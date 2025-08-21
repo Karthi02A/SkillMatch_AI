@@ -1,19 +1,18 @@
+# Upgrade pip first
+pip==25.2
+
 # Core app
-streamlit
-pandas
-matplotlib
+streamlit==1.37.0
+pandas==2.2.2
+matplotlib==3.9.2
 
 # Resume parsing
-PyPDF2
-python-docx
+PyPDF2==3.0.1
+python-docx==1.1.2
 
 # NLP
-spacy
+spacy==3.7.4
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
 # Report generation
-reportlab
-fpdf
-
-# Optional (safety net for text similarity, if you want TF-IDF fallback later)
-scikit-learn
+reportlab==4.2.2
