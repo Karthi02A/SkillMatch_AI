@@ -1,44 +1,98 @@
 import re
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import spacy
 
-def clean_text(text):
-    if pd.isna(text):
-        return ""
-    text = str(text).lower()
-    text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
+# ------------------- LOAD SPACY MODEL -------------------
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    import os
+    os.system("python -m spacy download en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
+
+
+# ------------------- RESUME TEXT EXTRACTION -------------------
+def extract_text_from_resume(uploaded_file):
+    """Extract raw text from PDF, DOCX, or TXT resumes."""
+    text = ""
+    file_type = uploaded_file.name.split(".")[-1].lower()
+
+    if file_type == "pdf":
+        from PyPDF2 import PdfReader
+        pdf = PdfReader(uploaded_file)
+        for page in pdf.pages:
+            text += page.extract_text() or ""
+
+    elif file_type == "docx":
+        import docx
+        doc = docx.Document(uploaded_file)
+        text = "\n".join([para.text for para in doc.paragraphs])
+
+    elif file_type == "txt":
+        text = uploaded_file.read().decode("utf-8", errors="ignore")
+
     return text.strip()
 
-def extract_text_from_resume(uploaded_file):
-    if uploaded_file is None:
-        return ""
-    return uploaded_file.read().decode("utf-8", errors="ignore")
 
-def load_job_descriptions(file_path="job_descriptions.csv"):
+# ------------------- JOB DESCRIPTIONS LOADER -------------------
+def load_job_descriptions(file_path):
+    """
+    Reads job_descriptions.csv and normalizes columns.
+    Your CSV headers: Job_Id, Job_role, Skill, Job descriptions , Keywords, Combined_Text, cleaned_text
+    We will map them to: job_title, skills, job_description
+    """
     df = pd.read_csv(file_path)
 
-    expected_cols = {"job_title", "job_description", "skills"}
-    if not expected_cols.issubset(set(df.columns)):
-        raise ValueError(f"CSV must contain columns: {expected_cols}")
+    # Normalize column names
+    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
-    # ✅ Ensure proper job title formatting like "Data Scientist"
-    df["job_title"] = df["job_title"].astype(str).str.strip().str.title()
-    df["job_description"] = df["job_description"].astype(str).apply(clean_text)
-    df["skills"] = df["skills"].astype(str).apply(clean_text)
-    return df
+    # Map known columns
+    rename_map = {}
+    if "job_role" in df.columns:
+        rename_map["job_role"] = "job_title"
+    if "skill" in df.columns:
+        rename_map["skill"] = "skills"
+    if "job_descriptions" in df.columns:   # ✅ Fix here
+        rename_map["job_descriptions"] = "job_description"
 
+    df.rename(columns=rename_map, inplace=True)
+
+    # Validate required columns
+    expected_cols = {"job_title", "skills", "job_description"}
+    if not expected_cols.issubset(df.columns):
+        raise ValueError(
+            f"❌ Missing required columns. Found: {list(df.columns)}. "
+            f"Expected at least: {expected_cols}"
+        )
+
+    return df[["job_title", "skills", "job_description"]]
+
+# ------------------- MATCHING SCORE -------------------
 def get_match_score(resume_text, job_description):
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf_matrix = vectorizer.fit_transform([resume_text, job_description])
-    score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-    return round(score * 100, 2)
+    """
+    Compute similarity score between resume text and job description
+    using spaCy semantic similarity (0–100 scale).
+    """
+    if not resume_text.strip() or not job_description.strip():
+        return 0.0
+
+    resume_doc = nlp(resume_text.lower())
+    job_doc = nlp(job_description.lower())
+
+    similarity = resume_doc.similarity(job_doc)
+    return round(similarity * 100, 2)
 
 
-def extract_skills(text, skills_list):
-    found_skills = []
-    text = text.lower()
-    for skill in skills_list:
-        if re.search(r"\b" + re.escape(skill.lower()) + r"\b", text):
-            found_skills.append(skill)
-    return found_skills
+# ------------------- SKILL EXTRACTION -------------------
+def extract_skills(resume_text, jd_skills):
+    """
+    Extract skills from resume text by matching against JD skills.
+    Case-insensitive.
+    """
+    resume_text_lower = resume_text.lower()
+    matched = []
+    for skill in str(jd_skills).split(","):
+        skill = skill.strip()
+        if skill and re.search(rf"\b{re.escape(skill.lower())}\b", resume_text_lower):
+            matched.append(skill)
+    return matched
