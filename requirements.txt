@@ -1,7 +1,19 @@
+# Core app
 streamlit
-spacy
 pandas
+matplotlib
+
+# Resume parsing
 PyPDF2
 python-docx
-scikit-learn
+
+# NLP
+spacy
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# Report generation
+reportlab
+fpdf
+
+# Optional (safety net for text similarity, if you want TF-IDF fallback later)
+scikit-learn
