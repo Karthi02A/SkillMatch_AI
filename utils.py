@@ -3,13 +3,15 @@ import pandas as pd
 import spacy
 
 # ------------------- LOAD SPACY MODEL -------------------
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    import subprocess
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
+def load_spacy_model():
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        import subprocess, sys
+        subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+        return spacy.load("en_core_web_sm")
 
+nlp = load_spacy_model()
 
 # ------------------- RESUME TEXT EXTRACTION -------------------
 def extract_text_from_resume(uploaded_file):
