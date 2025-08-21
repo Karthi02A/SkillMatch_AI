@@ -5,14 +5,23 @@ import spacy
 # ------------------- LOAD SPACY MODEL -------------------
 def load_spacy_model():
     try:
+        # Try normal load (when installed via pip/requirements.txt)
         return spacy.load("en_core_web_sm")
     except OSError:
-        import subprocess, sys
-        subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
-        return spacy.load("en_core_web_sm")
+        try:
+            # Fallback: try to import as a module
+            import en_core_web_sm
+            return en_core_web_sm.load()
+        except ImportError:
+            raise OSError(
+                "❌ spaCy model 'en_core_web_sm' not found. "
+                "Make sure it's listed in requirements.txt:\n\n"
+                "en_core_web_sm @ https://github.com/explosion/spacy-models/"
+                "releases/download/en_core_web_sm-3.7.1/"
+                "en_core_web_sm-3.7.1-py3-none-any.whl"
+            )
 
 nlp = load_spacy_model()
-
 # ------------------- RESUME TEXT EXTRACTION -------------------
 def extract_text_from_resume(uploaded_file):
     """Extract raw text from PDF, DOCX, or TXT resumes."""
