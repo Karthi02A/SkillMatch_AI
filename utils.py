@@ -6,8 +6,8 @@ import spacy
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    import os
-    os.system("python -m spacy download en_core_web_sm")
+    import subprocess
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
     nlp = spacy.load("en_core_web_sm")
 
 
@@ -38,13 +38,16 @@ def extract_text_from_resume(uploaded_file):
 def load_job_descriptions(file_path):
     """
     Reads job_descriptions.csv and normalizes columns.
-    Your CSV headers: Job_Id, Job_role, Skill, Job descriptions , Keywords, Combined_Text, cleaned_text
-    We will map them to: job_title, skills, job_description
+    Maps to: job_title, skills, job_description
     """
     df = pd.read_csv(file_path)
 
-    # Normalize column names
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    # Normalize column names (strip + lowercase + replace spaces)
+    df.columns = (
+        df.columns.str.strip()
+        .str.lower()
+        .str.replace(r"\s+", "_", regex=True)
+    )
 
     # Map known columns
     rename_map = {}
@@ -52,7 +55,7 @@ def load_job_descriptions(file_path):
         rename_map["job_role"] = "job_title"
     if "skill" in df.columns:
         rename_map["skill"] = "skills"
-    if "job_descriptions" in df.columns:   # ✅ Fix here
+    if "job_descriptions" in df.columns:
         rename_map["job_descriptions"] = "job_description"
 
     df.rename(columns=rename_map, inplace=True)
@@ -67,12 +70,10 @@ def load_job_descriptions(file_path):
 
     return df[["job_title", "skills", "job_description"]]
 
+
 # ------------------- MATCHING SCORE -------------------
 def get_match_score(resume_text, job_description):
-    """
-    Compute similarity score between resume text and job description
-    using spaCy semantic similarity (0–100 scale).
-    """
+    """Compute similarity score (0–100) using spaCy embeddings."""
     if not resume_text.strip() or not job_description.strip():
         return 0.0
 
@@ -85,10 +86,7 @@ def get_match_score(resume_text, job_description):
 
 # ------------------- SKILL EXTRACTION -------------------
 def extract_skills(resume_text, jd_skills):
-    """
-    Extract skills from resume text by matching against JD skills.
-    Case-insensitive.
-    """
+    """Extract skills from resume text by matching against JD skills."""
     resume_text_lower = resume_text.lower()
     matched = []
     for skill in str(jd_skills).split(","):
