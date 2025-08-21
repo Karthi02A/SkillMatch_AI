@@ -173,9 +173,10 @@ if uploaded_file:
             ax.set_ylabel("Count")
             st.pyplot(fig)
 
-            # 📄 Job description
+            # Job description
             st.write("### 📄 Job Description")
-            st.markdown(f"<div class='panel'>{selected_job['job_description']}</div>", unsafe_allow_html=True)
+            st.code(selected_job['job_description'], language="text")
+
 
             # ------------------- DOWNLOAD REPORT -------------------
             st.write("### 📥 Download Your Report")
