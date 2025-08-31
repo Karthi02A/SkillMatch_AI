@@ -24,182 +24,821 @@ logger = logging.getLogger(__name__)
 
 # ------------------- PAGE SETUP -------------------
 st.set_page_config(
-    page_title="🧠 SkillMatch AI", 
+    page_title="SkillMatch AI", 
     layout="wide", 
     page_icon="🧠",
     initial_sidebar_state="expanded"
 )
 
-# ------------------- ENHANCED CUSTOM CSS -------------------
+# ------------------- OPTIMIZED CSS - MEDIUM SIZING -------------------
 st.markdown("""
     <style>
-        /* Global Styles */
-        .main { padding-top: 2rem; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        /* Header Styles */
-        .main-header {
+        /* Global Variables - DARK THEME */
+        :root {
+            --primary-color: #7c3aed;
+            --primary-dark: #5b21b6;
+            --secondary-color: #06b6d4;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050507;
+            --card-bg: #1a1b23;
+            --card-hover: #22232b;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border-color: #27272a;
+            --border-glow: #3f3f46;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 15px rgba(124, 58, 237, 0.25);
+            --shadow-glow-cyan: 0 0 15px rgba(6, 182, 212, 0.25);
+            --shadow-glow-success: 0 0 15px rgba(16, 185, 129, 0.25);
+            --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a855f7 25%, #06b6d4 75%, #3b82f6 100%);
+            --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #0891b2 25%, #7c3aed 75%, #a855f7 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 25%, #06b6d4 75%, #0891b2 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 25%, #ea580c 75%, #dc2626 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 25%, #b91c1c 75%, #991b1b 100%);
+            --gradient-bg: linear-gradient(135deg, #0a0a0f 0%, #1a1b23 25%, #0f0f14 75%, #050507 100%);
+            --neon-purple: #8b5cf6;
+            --neon-cyan: #06b6d4;
+            --neon-green: #10b981;
+        }
+        
+        /* Global Styles - OPTIMIZED SIZING */
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 500;
+        }
+        
+        .stApp {
+            background: var(--gradient-bg) !important;
+        }
+        
+        .main {
+            padding: 0.75rem 1.5rem 2rem 1.5rem;
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+        
+        /* Subtle Background Effects */
+        .main::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: subtleFloat 20s ease-in-out infinite alternate;
+        }
+        
+        @keyframes subtleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        /* Minimal Grid Overlay */
+        .main::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(124, 58, 237, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        /* Header Styles - MEDIUM SIZE */
+        .hero-section {
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2.5rem 0 3rem 0;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            animation: subtlePulse 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes subtlePulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .main-header {
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+            background-clip: text;
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+            animation: slideInDown 0.8s ease-out;
         }
         
         .sub-header {
-            text-align: center;
-            color: #6c757d;
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            animation: slideInUp 0.8s ease-out 0.1s both;
         }
         
-        /* Metric Cards */
-        .metric-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .feature-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+        
+        .feature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid var(--border-glow);
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .feature-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--neon-purple);
+        }
+        
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Card Styles - MEDIUM SIZE */
+        .modern-card {
+            background: var(--card-bg);
+            border-radius: 16px;
             padding: 1.5rem;
-            border-radius: 15px;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-glow);
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        
+        .modern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0.8;
+        }
+        
+        .modern-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--neon-purple);
+        }
+        
+        .upload-card {
+            background: var(--card-bg);
+            border: 2px dashed var(--neon-purple);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.25s ease;
+            position: relative;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .upload-card:hover {
+            border-color: var(--neon-cyan);
+            background: var(--card-hover);
+            box-shadow: var(--shadow-glow-cyan);
+        }
+        
+        .upload-card::after {
+            content: '📁';
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            opacity: 0.2;
+        }
+        
+        /* Section Headers - MEDIUM SIZE */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 2rem 0 1.5rem 0;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: var(--gradient-primary);
+            margin-left: 1rem;
+            border-radius: 1px;
+            opacity: 0.8;
+        }
+        
+        /* Metric Cards - MEDIUM SIZE */
+        .metric-card {
+            background: var(--gradient-primary);
+            padding: 1.5rem;
+            border-radius: 16px;
             color: white;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-glow);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: -25%;
+            right: -25%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: subtleShimmer 6s ease-in-out infinite;
+        }
+        
+        @keyframes subtleShimmer {
+            0%, 100% { transform: rotate(0deg); opacity: 0.2; }
+            50% { transform: rotate(180deg); opacity: 0.4; }
         }
         
         .metric-value {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 2rem;
+            font-weight: 800;
             margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
         }
         
         .metric-label {
-            font-size: 1rem;
+            font-size: 0.9rem;
             opacity: 0.9;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
         }
         
-        /* Skill Badges */
+        /* Skill Badges - MEDIUM SIZE */
         .skill-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--gradient-success);
             color: white;
-            padding: 8px 16px;
-            margin: 4px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
+            padding: 0.5rem 0.8rem;
+            margin: 0.3rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         
         .skill-badge:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-glow-success);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-badge::before {
+            content: '✓';
+            font-size: 0.7rem;
+            font-weight: 800;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .missing-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--gradient-danger);
             color: white;
-            padding: 8px 16px;
-            margin: 4px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
+            padding: 0.5rem 0.8rem;
+            margin: 0.3rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         
         .missing-badge:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+            border-color: rgba(255, 255, 255, 0.2);
         }
         
-        /* Panel Styles */
+        .missing-badge::before {
+            content: '!';
+            font-size: 0.7rem;
+            font-weight: 800;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Info Panels - MEDIUM SIZE */
         .info-panel {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-hover) 100%);
+            border: 1px solid var(--border-glow);
+            border-left: 3px solid var(--neon-purple);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            color: var(--text-primary);
+            font-weight: 500;
         }
         
         .success-panel {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            border: 1px solid #c3e6cb;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 1rem 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--card-bg) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-left: 3px solid var(--neon-green);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+            color: var(--text-primary);
+            font-weight: 600;
         }
         
         .warning-panel {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            border: 1px solid #ffeaa7;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-        }
-        
-        /* Progress Bar Custom */
-        .stProgress .st-bo {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-        
-        /* File Uploader */
-        .uploadedFile {
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            background: #f8f9fa;
-        }
-        
-        /* Sidebar */
-        .sidebar .sidebar-content {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        /* Custom buttons */
-        .stButton button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 25px;
-            padding: 0.5rem 2rem;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--card-bg) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+            color: var(--text-primary);
             font-weight: 600;
-            transition: all 0.3s;
+        }
+        
+        /* Buttons - MEDIUM SIZE */
+        .stButton button {
+            background: var(--gradient-primary) !important;
+            border: 1px solid var(--neon-purple) !important;
+            border-radius: 20px !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            transition: all 0.25s ease !important;
+            box-shadow: var(--shadow-sm) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            color: white !important;
         }
         
         .stButton button:hover {
+            transform: translateY(-2px) scale(1.01) !important;
+            box-shadow: var(--shadow-glow) !important;
+            border-color: var(--neon-cyan) !important;
+        }
+        
+        .stButton button:active {
+            transform: translateY(-1px) !important;
+        }
+        
+        /* File Uploader - MEDIUM SIZE */
+        .stFileUploader {
+            border: none !important;
+        }
+        
+        .stFileUploader > div > div {
+            border: 2px dashed var(--neon-purple) !important;
+            border-radius: 16px !important;
+            background: var(--card-bg) !important;
+            transition: all 0.25s ease !important;
+            color: var(--text-primary) !important;
+            padding: 1.5rem !important;
+        }
+        
+        .stFileUploader > div > div:hover {
+            border-color: var(--neon-cyan) !important;
+            background: var(--card-hover) !important;
+            box-shadow: var(--shadow-glow-cyan) !important;
+        }
+        
+        /* Sidebar - COMPACT */
+        .css-1d391kg {
+            background: var(--gradient-primary) !important;
+        }
+        
+        .sidebar .sidebar-content {
+            background: var(--gradient-primary) !important;
+            color: white !important;
+        }
+        
+        /* Progress Bar - MEDIUM SIZE */
+        .stProgress > div > div > div {
+            background: var(--gradient-primary) !important;
+            box-shadow: 0 0 8px var(--neon-purple) !important;
+        }
+        
+        .stProgress > div > div {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-glow) !important;
+        }
+        
+        /* Selectbox - MEDIUM SIZE */
+        .stSelectbox > div > div {
+            border-radius: 12px !important;
+            border: 1px solid var(--border-glow) !important;
+            box-shadow: var(--shadow-sm) !important;
+            background: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stSelectbox > div > div:focus-within {
+            border-color: var(--neon-purple) !important;
+            box-shadow: var(--shadow-glow) !important;
+        }
+        
+        /* Text Areas - MEDIUM SIZE */
+        .stTextArea > div > div {
+            border-radius: 12px !important;
+            border: 1px solid var(--border-glow) !important;
+            box-shadow: var(--shadow-sm) !important;
+            background: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stTextArea > div > div:focus-within {
+            border-color: var(--neon-purple) !important;
+            box-shadow: var(--shadow-glow) !important;
+        }
+        
+        /* Expander - MEDIUM SIZE */
+        .streamlit-expanderHeader {
+            background: var(--card-bg) !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--border-glow) !important;
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .streamlit-expanderContent {
+            background: var(--card-hover) !important;
+            border-radius: 0 0 12px 12px !important;
+            border: 1px solid var(--border-glow) !important;
+            border-top: none !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* Stats Container - OPTIMIZED GRID */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        /* Mini Metric Cards */
+        .mini-metric-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-glow);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+        }
+        
+        .mini-metric-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: var(--shadow-md);
+            border-color: var(--neon-purple);
+        }
+        
+        .mini-metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mini-metric-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Custom Scrollbars - THINNER */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+            border-radius: 8px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 8px;
+            border: 1px solid var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gradient-secondary);
+        }
+        
+        /* General Text Sizing */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+        }
+        
+        p, span, div {
+            color: var(--text-primary) !important;
+        }
+        
+        .stMarkdown {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Compact Sidebar Elements */
+        .sidebar-feature {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(124, 58, 237, 0.15);
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.25);
+        }
+        
+        .sidebar-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            background: rgba(124, 58, 237, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        
+        .step-number {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 50%;
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+        }
+        
+        .step-text {
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Responsive Design - OPTIMIZED */
+        @media (max-width: 768px) {
+            .main-header {
+                font-size: 2rem;
+            }
+            
+            .main {
+                padding: 0.5rem;
+            }
+            
+            .modern-card {
+                padding: 1.25rem;
+            }
+            
+            .section-header {
+                font-size: 1.25rem;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            
+            .feature-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* File Details Styling */
+        .file-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background: var(--card-hover);
+            border-radius: 8px;
+            border-left: 2px solid var(--primary-color);
+        }
+        
+        .file-detail-key {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+        
+        .file-detail-value {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        /* Code Preview Styling */
+        .code-preview {
+            background: #000;
+            border-radius: 8px;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+            max-height: 150px;
+            overflow-y: auto;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# ------------------- HEADER -------------------
-st.markdown('<h1 class="main-header">🧠 SkillMatch AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Advanced Resume & Job Role Matching Platform</p>', unsafe_allow_html=True)
-st.markdown("---")
+# ------------------- COMPACT HERO SECTION -------------------
+st.markdown("""
+    <div class="hero-section">
+        <h1 class="main-header">SkillMatch AI</h1>
+        <p class="sub-header">AI-Powered Resume Analysis & Career Optimization</p>
+        <div class="feature-badges">
+            <div class="feature-badge">
+                <span>🎯</span> Precision Matching
+            </div>
+            <div class="feature-badge">
+                <span>🚀</span> AI Insights
+            </div>
+            <div class="feature-badge">
+                <span>⚡</span> Instant Analysis
+            </div>
+            <div class="feature-badge">
+                <span>🔥</span> Career Boost
+            </div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
-# ------------------- SIDEBAR -------------------
+# ------------------- COMPACT SIDEBAR -------------------
 with st.sidebar:
-    st.markdown("### 📋 Application Info")
-    st.info("""
-    **SkillMatch AI** helps you:
-    - 📊 Calculate resume-job compatibility
-    - 🎯 Identify skill gaps
-    - 📈 Get improvement recommendations
-    - 📄 Generate detailed reports
-    """)
-    
-    st.markdown("### 🚀 How to Use")
+    st.markdown("### Advanced Features")
     st.markdown("""
-    1. **Upload** your resume (PDF/DOCX/TXT)
-    2. **Select** a target job role
-    3. **Click** 'Analyze Match' button
-    4. **Review** your results and recommendations
-    5. **Download** your detailed report
-    """)
+    <div class="info-panel">
+        <strong>SkillMatch AI</strong> delivers intelligent career analysis:
+        <br><br>
+        <div class="sidebar-feature">
+            <div>🎯 <strong>Smart Analysis:</strong> Advanced matching algorithms</div>
+            <div>⚡ <strong>Quick Insights:</strong> Real-time gap identification</div>
+            <div>🚀 <strong>AI Recommendations:</strong> Personalized career advice</div>
+            <div>💎 <strong>Detailed Reports:</strong> Professional analysis documents</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.markdown("### 📞 Support")
-    st.markdown("Having issues? Check our [FAQ](#) or [Contact Support](#)")
+    st.markdown("### Quick Start")
+    steps = [
+        "📤 Upload Resume",
+        "🎯 Select Role", 
+        "⚡ Run Analysis",
+        "📊 View Results",
+        "📥 Download Report"
+    ]
+    
+    for i, step in enumerate(steps, 1):
+        st.markdown(f"""
+        <div class="sidebar-step">
+            <div class="step-number">{i}</div>
+            <span class="step-text">{step}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### Pro Tips")
+    st.markdown("""
+    <div class="sidebar-feature">
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">💼 Keep Resume Updated</div>
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">🔍 Use Power Keywords</div>
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">📈 Track Progress</div>
+        <div style="font-weight: 700;">🎯 Target Smart Roles</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### Support")
+    st.markdown("""
+    <div style="text-align: center; color: white;">
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📚 <a href="#" style="color: #06b6d4; text-decoration: none;">Guide</a></div>
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">💬 <a href="#" style="color: #06b6d4; text-decoration: none;">Help</a></div>
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📧 <a href="#" style="color: #06b6d4; text-decoration: none;">Contact</a></div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ------------------- DATA LOADING -------------------
 @st.cache_data(ttl=3600)
@@ -212,11 +851,22 @@ def load_data():
         st.info("📝 Make sure 'job_descriptions.csv' exists with columns: job_title, skills, job_description")
         st.stop()
 
-# Load data
+# Load data with compact loading indicator
 with st.spinner("🔄 Loading job descriptions..."):
     job_data = load_data()
 
-st.success(f"✅ Loaded {len(job_data)} job descriptions successfully!")
+# Compact success message
+st.markdown(f"""
+<div class="success-panel">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="font-size: 1.25rem;">✅</div>
+        <div>
+            <strong style="font-size: 1rem; font-weight: 800;">System Ready!</strong><br>
+            <span style="color: #10b981; font-weight: 600; font-size: 0.9rem;">Loaded {len(job_data)} job profiles</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ------------------- PROFESSIONAL TITLE FORMATTER -------------------
 import re
@@ -303,84 +953,202 @@ else:
     st.stop()
 
 # ------------------- MAIN APPLICATION -------------------
-st.markdown("## 📁 Upload Your Resume")
+st.markdown('<div class="section-header">📁 Upload Resume</div>', unsafe_allow_html=True)
 
-# File upload with enhanced styling
+# Compact file upload section
+st.markdown("""
+<div class="modern-card">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 1rem;">📄</div>
+        <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-weight: 800; font-size: 1.25rem;">Upload Your Resume</h3>
+        <p style="color: var(--text-secondary); font-weight: 600; font-size: 0.9rem;">Supported: PDF • DOCX • TXT • Max: 200MB</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# File upload
 uploaded_file = st.file_uploader(
     "Choose your resume file",
     type=["pdf", "docx", "txt"],
-    help="Supported formats: PDF, DOCX, TXT (Max size: 200MB)"
+    help="Drag and drop your file here or click to browse",
+    label_visibility="collapsed"
 )
 
 if uploaded_file:
-    # Display file info
-    file_details = {
-        "Filename": uploaded_file.name,
-        "File Size": f"{uploaded_file.size / 1024:.2f} KB",
-        "File Type": uploaded_file.type
-    }
+    # Compact file info display
+    st.markdown("""
+    <div class="modern-card">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <div style="font-size: 1.5rem;">📎</div>
+            <div style="flex: 1;">
+                <h4 style="margin: 0; color: var(--text-primary); font-size: 1rem;">File Uploaded Successfully</h4>
+                <p style="margin: 0.25rem 0 0 0; color: var(--text-secondary); font-size: 0.8rem;">Ready for analysis</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Compact file details
     with st.expander("📄 File Details", expanded=False):
+        file_details = {
+            "📝 Filename": uploaded_file.name,
+            "📊 File Size": f"{uploaded_file.size / 1024:.2f} KB",
+            "🗂️ File Type": uploaded_file.type
+        }
+        
         for key, value in file_details.items():
-            st.write(f"**{key}:** {value}")
+            st.markdown(f"""
+            <div class="file-detail-item">
+                <span class="file-detail-key">{key}</span>
+                <span class="file-detail-value">{value}</span>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Extract resume text
-    with st.spinner("📖 Processing your resume..."):
+    with st.spinner("📖 Processing resume..."):
         resume_text = extract_text_from_resume(uploaded_file)
     
     if resume_text:
-        st.success("✅ Resume processed successfully!")
+        # Compact success message
+        st.markdown("""
+        <div class="success-panel">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="font-size: 1.25rem;">✅</div>
+                <div>
+                    <strong style="font-size: 0.95rem;">Resume Processed!</strong><br>
+                    <span style="color: #059669; font-size: 0.8rem;">Text extracted successfully</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Show text preview
-        with st.expander("👀 Resume Text Preview", expanded=False):
-            st.text_area(
-                "Extracted Text (First 500 characters):",
-                value=resume_text[:500] + "..." if len(resume_text) > 500 else resume_text,
-                height=150,
-                disabled=True
-            )
+        # Compact text preview
+        with st.expander("👀 Resume Preview", expanded=False):
+            preview_text = resume_text[:400] + "..." if len(resume_text) > 400 else resume_text
+            st.markdown(f"""
+            <div style="background: var(--card-bg); border-radius: 12px; padding: 1rem; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <span style="font-size: 1rem;">📄</span>
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">Extracted Text</strong>
+                    <span style="background: var(--primary-color); color: white; padding: 0.2rem 0.4rem; border-radius: 8px; font-size: 0.7rem; font-weight: 600;">{len(resume_text)} chars</span>
+                </div>
+                <div class="code-preview">
+                    {preview_text}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         
-        # Job role selection
-        st.markdown("## 🎯 Select Target Job Role")
+        # Job role selection section
+        st.markdown('<div class="section-header">🎯 Select Target Role</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="modern-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">🎯</div>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">Choose Your Target Role</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">Select the job position that matches your goals</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Create categories for better UX
+            # Job role selection
             job_roles = sorted(job_data["display_title"].unique())
             job_role_display = st.selectbox(
-                "Choose the job role you're targeting:",
+                "Available Job Roles:",
                 options=job_roles,
-                help="Select the job role that best matches your career goals"
+                help="Select from our database of job roles",
+                key="job_role_selector"
             )
+            
+            # Compact role statistics
+            if job_role_display:
+                role_count = len(job_data[job_data["display_title"] == job_role_display])
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%); border-radius: 8px; padding: 0.75rem; margin: 0.75rem 0; border: 1px solid rgba(99, 102, 241, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1rem;">📊</span>
+                        <span style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">Role Stats:</span>
+                        <span style="background: var(--primary-color); color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">{role_count} variations</span>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
         
         with col2:
-            st.markdown("<br>", unsafe_allow_html=True)  # Spacing
-            analyze_button = st.button("🚀 Analyze Match", use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            analyze_button = st.button(
+                "🚀 Analyze", 
+                use_container_width=True,
+                help="Start AI analysis"
+            )
         
-        # Analysis section
+        # Analysis logic
         if analyze_button:
             if job_role_display not in job_data["display_title"].values:
-                st.error("❌ Invalid job role selected. Please choose a valid role.")
+                st.markdown("""
+                <div class="warning-panel">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="font-size: 1.25rem;">❌</div>
+                        <div>
+                            <strong style="font-size: 0.95rem;">Invalid Selection</strong><br>
+                            <span style="color: #d97706; font-size: 0.8rem;">Please choose a valid job role.</span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                with st.spinner("🔍 Analyzing your match..."):
-                    # Get selected job data
+                # Compact progress display
+                progress_container = st.container()
+                
+                with progress_container:
+                    st.markdown("""
+                    <div class="modern-card">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
+                            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">AI Analysis in Progress</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.85rem;">Analyzing your resume...</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Compact progress bar
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    analysis_steps = [
+                        "🔍 Extracting skills...",
+                        "📊 Analyzing requirements...", 
+                        "🎯 Calculating scores...",
+                        "📈 Generating insights...",
+                        "✅ Complete!"
+                    ]
+                    
+                    import time
+                    for i, step in enumerate(analysis_steps):
+                        status_text.markdown(f"""
+                        <div style="text-align: center; color: var(--text-primary); font-weight: 500; padding: 0.25rem; font-size: 0.85rem;">
+                            {step}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        progress_bar.progress((i + 1) / len(analysis_steps))
+                        time.sleep(0.2)
+                    
+                    progress_bar.empty()
+                    status_text.empty()
+                
+                # Perform analysis
+                with st.spinner("🔍 Analyzing match..."):
                     selected_job = job_data[job_data["display_title"] == job_role_display].iloc[0]
                     
-                    # Calculate comprehensive match score
                     try:
-                        # Option 1: If calculate_comprehensive_score takes only 2 arguments
-                        # Check what your utils.py function signature actually is
-                        
-                        # First, let's try the basic match score
                         basic_match_score = get_match_score(resume_text, selected_job["skills"])
                         
-                        # Extract skills for detailed analysis
                         resume_skills = extract_skills_advanced(resume_text)
                         job_skills_text = selected_job["skills"]
                         job_skills = extract_skills_advanced(job_skills_text)
                         
-                        # Calculate matched and missing skills
                         matched_skills = []
                         missing_skills = []
                         
@@ -392,15 +1160,12 @@ if uploaded_file:
                             else:
                                 missing_skills.append(skill)
                         
-                        # Calculate scores
                         if len(job_skills) > 0:
                             skill_match_percentage = (len(matched_skills) / len(job_skills)) * 100
                         else:
                             skill_match_percentage = 0
                         
-                        # Try different function calls based on your utils.py implementation
                         try:
-                            # Try with 3 parameters first
                             match_result = calculate_comprehensive_score(
                                 resume_text, 
                                 selected_job["skills"], 
@@ -414,7 +1179,6 @@ if uploaded_file:
                         
                         except TypeError as e:
                             if "takes 2 positional arguments but 3 were given" in str(e):
-                                # Try with 2 parameters
                                 match_result = calculate_comprehensive_score(resume_text, selected_job["skills"])
                                 
                                 if isinstance(match_result, dict):
@@ -424,7 +1188,6 @@ if uploaded_file:
                                     matched_skills = match_result.get("matched_skills", matched_skills)
                                     missing_skills = match_result.get("missing_skills", missing_skills)
                                 else:
-                                    # If it returns a single score
                                     overall_score = match_result
                                     skill_match = skill_match_percentage
                                     context_match = basic_match_score
@@ -432,13 +1195,11 @@ if uploaded_file:
                                 raise e
                         
                         except Exception as e:
-                            # Fallback to basic calculations
                             st.warning(f"⚠️ Advanced scoring unavailable, using basic analysis: {str(e)}")
                             overall_score = skill_match_percentage
                             skill_match = skill_match_percentage
                             context_match = basic_match_score
                         
-                        # Generate recommendations
                         try:
                             recommendations = generate_skill_recommendations(
                                 missing_skills, 
@@ -450,25 +1211,37 @@ if uploaded_file:
                                 f"Consider learning {skill}" for skill in missing_skills[:5]
                             ]
                         
-                        # ------------------- RESULTS DISPLAY -------------------
-                        st.markdown("## 📊 Analysis Results")
-                        st.markdown("---")
+                        # Compact success message
+                        st.markdown("""
+                        <div class="success-panel">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="font-size: 1.25rem;">🎉</div>
+                                <div>
+                                    <strong style="font-size: 0.95rem;">Analysis Complete!</strong><br>
+                                    <span style="color: #059669; font-size: 0.8rem;">Resume analyzed successfully</span>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
-                        # Overall Score Display
+                        # ------------------- COMPACT RESULTS DISPLAY -------------------
+                        st.markdown('<div class="section-header">📊 Results</div>', unsafe_allow_html=True)
+                        
+                        # Main Score Display - 3 columns
                         col1, col2, col3 = st.columns(3)
                         
                         with col1:
                             score_color = "🟢" if overall_score >= 70 else "🟡" if overall_score >= 50 else "🔴"
                             st.markdown(f"""
-                                <div class="metric-card">
+                                <div class="metric-card" style="background: var(--gradient-primary);">
                                     <div class="metric-value">{score_color} {overall_score:.1f}%</div>
-                                    <div class="metric-label">Overall Match Score</div>
+                                    <div class="metric-label">Overall Match</div>
                                 </div>
                             """, unsafe_allow_html=True)
                         
                         with col2:
                             st.markdown(f"""
-                                <div class="metric-card">
+                                <div class="metric-card" style="background: var(--gradient-success);">
                                     <div class="metric-value">🎯 {skill_match:.1f}%</div>
                                     <div class="metric-label">Skill Match</div>
                                 </div>
@@ -476,80 +1249,153 @@ if uploaded_file:
                         
                         with col3:
                             st.markdown(f"""
-                                <div class="metric-card">
+                                <div class="metric-card" style="background: var(--gradient-secondary);">
                                     <div class="metric-value">📝 {context_match:.1f}%</div>
                                     <div class="metric-label">Context Match</div>
                                 </div>
                             """, unsafe_allow_html=True)
                         
-                        # Progress bars for detailed breakdown
-                        st.markdown("### 📈 Detailed Breakdown")
+                        # Mini metrics - 4 columns
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="mini-metric-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">✅</div>
+                                <div class="mini-metric-value" style="color: var(--success-color);">{len(matched_skills)}</div>
+                                <div class="mini-metric-label" style="color: var(--text-secondary);">Skills Found</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                            <div class="mini-metric-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">❌</div>
+                                <div class="mini-metric-value" style="color: var(--error-color);">{len(missing_skills)}</div>
+                                <div class="mini-metric-label" style="color: var(--text-secondary);">Missing</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="mini-metric-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">📋</div>
+                                <div class="mini-metric-value" style="color: var(--primary-color);">{len(job_skills)}</div>
+                                <div class="mini-metric-label" style="color: var(--text-secondary);">Required</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col4:
+                            grade = "A+" if overall_score >= 90 else "A" if overall_score >= 80 else "B" if overall_score >= 70 else "C" if overall_score >= 60 else "D"
+                            st.markdown(f"""
+                            <div class="mini-metric-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🏆</div>
+                                <div class="mini-metric-value" style="color: var(--warning-color);">{grade}</div>
+                                <div class="mini-metric-label" style="color: var(--text-secondary);">Grade</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        # Compact progress breakdown
+                        st.markdown('<div class="section-header">📈 Breakdown</div>', unsafe_allow_html=True)
                         
                         col1, col2 = st.columns(2)
                         
                         with col1:
-                            st.write("**Skills Alignment:**")
+                            st.markdown("""
+                            <div class="modern-card">
+                                <h4 style="color: var(--text-primary); margin-bottom: 0.75rem; font-size: 1rem;">Skills Alignment</h4>
+                            </div>
+                            """, unsafe_allow_html=True)
                             st.progress(skill_match / 100)
-                            st.write(f"{len(matched_skills)} skills matched out of {len(job_skills)} required")
+                            st.write(f"**{len(matched_skills)}** matched out of **{len(job_skills)}** required")
                         
                         with col2:
-                            st.write("**Experience Context:**")
+                            st.markdown("""
+                            <div class="modern-card">
+                                <h4 style="color: var(--text-primary); margin-bottom: 0.75rem; font-size: 1rem;">Experience Context</h4>
+                            </div>
+                            """, unsafe_allow_html=True)
                             st.progress(context_match / 100)
                             st.write("Based on resume content analysis")
                         
-                        # Skills Analysis
-                        st.markdown("### 🎯 Skills Analysis")
+                        # Skills Analysis - Compact
+                        st.markdown('<div class="section-header">🎯 Skills Analysis</div>', unsafe_allow_html=True)
                         
                         col1, col2 = st.columns(2)
                         
                         with col1:
-                            st.markdown("#### ✅ Matched Skills")
+                            st.markdown("""
+                            <div class="modern-card">
+                                <h4 style="color: var(--success-color); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem;">
+                                    <span>✅</span> Matched Skills
+                                </h4>
+                            """, unsafe_allow_html=True)
                             if matched_skills:
-                                skills_html = "".join([f'<span class="skill-badge">{skill}</span>' for skill in matched_skills[:15]])
-                                st.markdown(f'<div class="success-panel">{skills_html}</div>', unsafe_allow_html=True)
+                                skills_html = "".join([f'<span class="skill-badge">{skill}</span>' for skill in matched_skills[:12]])
+                                st.markdown(f'<div style="margin: 0.75rem 0;">{skills_html}</div>', unsafe_allow_html=True)
                                 
-                                if len(matched_skills) > 15:
+                                if len(matched_skills) > 12:
                                     with st.expander(f"Show all {len(matched_skills)} matched skills"):
-                                        remaining_skills = "".join([f'<span class="skill-badge">{skill}</span>' for skill in matched_skills[15:]])
+                                        remaining_skills = "".join([f'<span class="skill-badge">{skill}</span>' for skill in matched_skills[12:]])
                                         st.markdown(remaining_skills, unsafe_allow_html=True)
                             else:
-                                st.warning("No skills matched. Consider updating your resume with relevant keywords.")
+                                st.warning("No skills matched. Consider updating your resume.")
+                            st.markdown("</div>", unsafe_allow_html=True)
                         
                         with col2:
-                            st.markdown("#### ❌ Missing Skills")
+                            st.markdown("""
+                            <div class="modern-card">
+                                <h4 style="color: var(--error-color); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem;">
+                                    <span>⚠️</span> Skills to Develop
+                                </h4>
+                            """, unsafe_allow_html=True)
                             if missing_skills:
-                                missing_html = "".join([f'<span class="missing-badge">{skill}</span>' for skill in missing_skills[:15]])
-                                st.markdown(f'<div class="warning-panel">{missing_html}</div>', unsafe_allow_html=True)
+                                missing_html = "".join([f'<span class="missing-badge">{skill}</span>' for skill in missing_skills[:12]])
+                                st.markdown(f'<div style="margin: 0.75rem 0;">{missing_html}</div>', unsafe_allow_html=True)
                                 
-                                if len(missing_skills) > 15:
+                                if len(missing_skills) > 12:
                                     with st.expander(f"Show all {len(missing_skills)} missing skills"):
-                                        remaining_missing = "".join([f'<span class="missing-badge">{skill}</span>' for skill in missing_skills[15:]])
+                                        remaining_missing = "".join([f'<span class="missing-badge">{skill}</span>' for skill in missing_skills[12:]])
                                         st.markdown(remaining_missing, unsafe_allow_html=True)
                             else:
-                                st.success("🎉 Great! You have all the required skills!")
+                                st.success("🎉 All required skills found!")
+                            st.markdown("</div>", unsafe_allow_html=True)
                         
-                        # Recommendations Section
+                        # Compact Recommendations
                         if recommendations:
-                            st.markdown("### 💡 Improvement Recommendations")
-                            st.markdown('<div class="info-panel">', unsafe_allow_html=True)
+                            st.markdown('<div class="section-header">💡 Recommendations</div>', unsafe_allow_html=True)
                             
-                            for i, rec in enumerate(recommendations[:5], 1):
-                                st.markdown(f"**{i}.** {rec}")
-                            
-                            st.markdown('</div>', unsafe_allow_html=True)
+                            for i, rec in enumerate(recommendations[:3], 1):
+                                priority = "High" if i <= 2 else "Medium"
+                                priority_color = "var(--error-color)" if priority == "High" else "var(--warning-color)"
+                                icon = "🎯" if i == 1 else "📚" if i == 2 else "💡"
+                                
+                                st.markdown(f"""
+                                <div class="modern-card">
+                                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                                        <div style="font-size: 1.25rem;">{icon}</div>
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                                <h4 style="margin: 0; color: var(--text-primary); font-size: 0.95rem;">Recommendation {i}</h4>
+                                                <span style="background: {priority_color}; color: white; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.65rem; font-weight: 600;">{priority}</span>
+                                            </div>
+                                            <p style="margin: 0; color: var(--text-secondary); line-height: 1.4; font-size: 0.85rem;">{rec}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
                         
-                        # Visualization Section
-                        st.markdown("### 📊 Visual Analysis")
+                        # Compact Visualization Section
+                        st.markdown('<div class="section-header">📊 Visual Analysis</div>', unsafe_allow_html=True)
                         
-                        # Create visualizations
                         fig_col1, fig_col2 = st.columns(2)
                         
                         with fig_col1:
-                            # Score breakdown pie chart
+                            # Compact pie chart
                             if matched_skills or missing_skills:
                                 labels = ['Matched Skills', 'Missing Skills']
                                 values = [len(matched_skills), len(missing_skills)]
-                                colors = ['#28a745', '#dc3545']
+                                colors = ['#10b981', '#ef4444']
                                 
                                 fig = go.Figure(data=[go.Pie(
                                     labels=labels, 
@@ -559,33 +1405,35 @@ if uploaded_file:
                                 )])
                                 fig.update_layout(
                                     title="Skills Distribution",
-                                    font=dict(size=14),
-                                    height=400
+                                    font=dict(size=12),
+                                    height=300,
+                                    margin=dict(t=40, b=20, l=20, r=20)
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
                             else:
-                                st.info("No skills data available for visualization")
+                                st.info("No skills data available")
                         
                         with fig_col2:
-                            # Score comparison bar chart
+                            # Compact bar chart
                             categories = ['Skill Match', 'Context Match', 'Overall Score']
                             scores = [skill_match, context_match, overall_score]
                             
                             fig = go.Figure([go.Bar(
                                 x=categories,
                                 y=scores,
-                                marker_color=['#667eea', '#764ba2', '#28a745']
+                                marker_color=['#6366f1', '#8b5cf6', '#10b981']
                             )])
                             fig.update_layout(
                                 title="Score Breakdown",
                                 yaxis=dict(range=[0, 100]),
-                                font=dict(size=14),
-                                height=400
+                                font=dict(size=12),
+                                height=300,
+                                margin=dict(t=40, b=20, l=20, r=20)
                             )
                             st.plotly_chart(fig, use_container_width=True)
                         
-                        # Detailed Job Requirements
-                        with st.expander("📋 View Full Job Requirements", expanded=False):
+                        # Compact Job Requirements
+                        with st.expander("📋 Job Requirements", expanded=False):
                             st.markdown("**Job Title:** " + prettify_role(selected_job["job_title"]))
                             st.markdown("**Required Skills:**")
                             st.write(selected_job["skills"])
@@ -593,8 +1441,8 @@ if uploaded_file:
                                 st.markdown("**Job Description:**")
                                 st.write(selected_job["job_description"])
                         
-                        # Export functionality
-                        st.markdown("### 💾 Export Results")
+                        # Compact Export Section
+                        st.markdown('<div class="section-header">📥 Export</div>', unsafe_allow_html=True)
                         
                         # Prepare report data
                         report_data = {
@@ -608,7 +1456,6 @@ if uploaded_file:
                             "Recommendations": " | ".join(recommendations[:5])
                         }
                         
-                        # Convert to DataFrame for export
                         report_df = pd.DataFrame([report_data])
                         
                         col1, col2 = st.columns(2)
@@ -617,14 +1464,13 @@ if uploaded_file:
                             csv_buffer = BytesIO()
                             report_df.to_csv(csv_buffer, index=False)
                             st.download_button(
-                                label="📄 Download CSV Report",
+                                label="📄 CSV Report",
                                 data=csv_buffer.getvalue(),
                                 file_name=f"skillmatch_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
                                 mime="text/csv"
                             )
                         
                         with col2:
-                            # Create a summary text report
                             text_report = f"""
 SKILLMATCH AI ANALYSIS REPORT
 ================================
@@ -644,31 +1490,66 @@ MISSING SKILLS:
 
 RECOMMENDATIONS:
 {chr(10).join([f"- {rec}" for rec in recommendations[:5]])}
-
-Generated by SkillMatch AI
-                            """
-                            
+"""
                             st.download_button(
-                                label="📝 Download Text Report",
+                                label="📝 Text Report",
                                 data=text_report,
-                                file_name=f"skillmatch_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                                file_name=f"skillmatch_summary_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
                                 mime="text/plain"
                             )
-                        
+                    
                     except Exception as e:
-                        st.error(f"❌ Error during analysis: {str(e)}")
-                        logger.error(f"Analysis error: {str(e)}")
-                        
-                        # Debug information
-                        st.info("🔧 Debug Information:")
-                        st.write(f"Function signature error: {type(e).__name__}")
-                        st.write("Please check your utils.py file functions.")
-                        
-                        # Show available functions for debugging
-                        try:
-                            from utils import calculate_comprehensive_score
-                            import inspect
-                            sig = inspect.signature(calculate_comprehensive_score)
-                            st.write(f"calculate_comprehensive_score signature: {sig}")
-                        except Exception as debug_e:
-                            st.write(f"Could not inspect function: {debug_e}")
+                        st.markdown(f"""
+                        <div class="warning-panel">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="font-size: 1.25rem;">⚠️</div>
+                                <div>
+                                    <strong style="font-size: 0.95rem;">Analysis Error</strong><br>
+                                    <span style="color: #d97706; font-size: 0.8rem;">Error: {str(e)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+    
+    else:
+        st.markdown("""
+        <div class="warning-panel">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="font-size: 1.25rem;">⚠️</div>
+                <div>
+                    <strong style="font-size: 0.95rem;">Processing Error</strong><br>
+                    <span style="color: #d97706; font-size: 0.8rem;">Unable to extract text. Try a different file.</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+else:
+    # Compact call-to-action
+    st.markdown("""
+    <div class="upload-card">
+        <div style="font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.5;">📁</div>
+        <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">Ready to Start?</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Upload your resume to begin AI analysis</p>
+        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+            <div style="background: var(--card-hover); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.75rem;">
+                <span style="margin-right: 0.5rem;">📄</span> PDF
+            </div>
+            <div style="background: var(--card-hover); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.75rem;">
+                <span style="margin-right: 0.5rem;">📝</span> DOCX
+            </div>
+            <div style="background: var(--card-hover); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.75rem;">
+                <span style="margin-right: 0.5rem;">📋</span> TXT
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Compact Footer
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; padding: 1.5rem 0; color: var(--text-secondary);">
+    <p style="margin-bottom: 0.25rem; font-size: 0.8rem;">Made with ❤️ using Streamlit • Powered by AI</p>
+    <p style="margin: 0; font-size: 0.75rem;">© 2024 SkillMatch AI. All rights reserved.</p>
+</div>
+""", unsafe_allow_html=True)
