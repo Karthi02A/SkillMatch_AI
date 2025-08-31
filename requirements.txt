@@ -1,4 +1,4 @@
-# Core & Environment
+# CORE & ENVIRONMENT
 python-dotenv==1.0.0
 python-dateutil==2.8.2
 tqdm==4.66.1
@@ -7,30 +7,30 @@ joblib==1.3.2
 loguru==0.7.2
 pydantic==2.4.2
 
-# Streamlit & Web Framework
+# STREAMLIT & WEB FRAMEWORK
 streamlit==1.37.0
 click==8.1.7
 
-# Data Processing & Analysis
+# DATA PROCESSING & ANALYSIS
 pandas==2.2.2
-numpy==1.26.4
+numpy==1.25.2   # ✅ Compatible with thinc & spacy
 
-# Visualization
+# VISUALIZATION
 matplotlib==3.9.2
 plotly==5.17.0
 seaborn==0.13.0
 
-# Resume/Document Processing
+# RESUME/DOCUMENT PROCESSING
 PyPDF2==2.10.7
 python-docx==0.8.11
 python-magic==0.4.27
 
-# Natural Language Processing
+# NATURAL LANGUAGE PROCESSING
 spacy==3.7.4
 nltk==3.8.1
 scikit-learn==1.3.2
 textdistance==4.6.0
 
-# Report Generation
+# REPORT GENERATION
 reportlab==4.2.2
 fpdf2==2.7.6
