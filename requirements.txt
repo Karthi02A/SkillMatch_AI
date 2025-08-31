@@ -1,50 +1,36 @@
-# ===============================
-# CORE & ENVIRONMENT
-# ===============================
+# Core & Environment
 python-dotenv==1.0.0
 python-dateutil==2.8.2
 tqdm==4.66.1
+orjson==3.9.7
 joblib==1.3.2
 loguru==0.7.2
 pydantic==2.4.2
 
-# ===============================
-# STREAMLIT & WEB FRAMEWORK
-# ===============================
+# Streamlit & Web Framework
 streamlit==1.37.0
 click==8.1.7
 
-# ===============================
-# DATA PROCESSING & ANALYSIS
-# ===============================
+# Data Processing & Analysis
 pandas==2.2.2
 numpy==1.26.4
 
-# ===============================
-# VISUALIZATION
-# ===============================
+# Visualization
 matplotlib==3.9.2
 plotly==5.17.0
 seaborn==0.13.0
 
-# ===============================
-# RESUME/DOCUMENT PROCESSING
-# ===============================
+# Resume/Document Processing
 PyPDF2==2.10.7
 python-docx==0.8.11
 python-magic==0.4.27
 
-# ===============================
-# NATURAL LANGUAGE PROCESSING
-# ===============================
+# Natural Language Processing
 spacy==3.7.4
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 nltk==3.8.1
 scikit-learn==1.3.2
 textdistance==4.6.0
 
-# ===============================
-# REPORT GENERATION
-# ===============================
+# Report Generation
 reportlab==4.2.2
 fpdf2==2.7.6
