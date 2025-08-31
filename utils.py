@@ -16,6 +16,7 @@ class Config:
     MAX_TEXT_LENGTH = 5000
     FUZZY_MATCH_THRESHOLD = 0.8
     CACHE_SIZE = 100
+    JOB_ROLE_SIMILARITY_THRESHOLD = 0.6  # Minimum similarity for valid job role
 
 # ------------------- RESUME PROCESSOR CLASS -------------------
 class ResumeProcessor:
@@ -66,6 +67,119 @@ class ResumeProcessor:
 
 # Global processor instance
 processor = ResumeProcessor()
+
+# ------------------- JOB ROLE VALIDATION -------------------
+def validate_job_role(selected_job_role: str, job_descriptions_df: pd.DataFrame) -> Dict:
+    """
+    Validate if the selected job role exists in the job descriptions dataset
+    
+    Args:
+        selected_job_role (str): The job role selected by user
+        job_descriptions_df (pd.DataFrame): DataFrame containing job descriptions
+        
+    Returns:
+        dict: Validation result with status and message
+    """
+    try:
+        if not selected_job_role or not isinstance(selected_job_role, str):
+            return {
+                "is_valid": False,
+                "message": "❌ Please select a valid job role",
+                "suggested_roles": []
+            }
+        
+        if job_descriptions_df.empty:
+            return {
+                "is_valid": False,
+                "message": "❌ No job descriptions data available",
+                "suggested_roles": []
+            }
+        
+        # Get available job titles
+        available_jobs = job_descriptions_df['job_title'].str.strip().str.lower().tolist()
+        selected_job_lower = selected_job_role.strip().lower()
+        
+        # Check for exact match
+        if selected_job_lower in available_jobs:
+            return {
+                "is_valid": True,
+                "message": "✅ Valid job role selected",
+                "suggested_roles": []
+            }
+        
+        # Check for fuzzy match with available job titles
+        best_matches = []
+        for job in available_jobs:
+            if job:  # Skip empty values
+                similarity = SequenceMatcher(None, selected_job_lower, job).ratio()
+                if similarity > Config.JOB_ROLE_SIMILARITY_THRESHOLD:
+                    best_matches.append((job, similarity))
+        
+        # Sort by similarity and get top 3 suggestions
+        best_matches.sort(key=lambda x: x[1], reverse=True)
+        suggested_roles = [match[0].title() for match in best_matches[:3]]
+        
+        if suggested_roles:
+            return {
+                "is_valid": False,
+                "message": f"❌ Invalid job role: '{selected_job_role}'. Did you mean one of these?",
+                "suggested_roles": suggested_roles
+            }
+        else:
+            # Get random sample of available roles for suggestion
+            available_roles_sample = job_descriptions_df['job_title'].dropna().sample(
+                min(5, len(job_descriptions_df))
+            ).tolist()
+            
+            return {
+                "is_valid": False,
+                "message": f"❌ Invalid job role: '{selected_job_role}'. This role is not available in our database.",
+                "suggested_roles": available_roles_sample
+            }
+            
+    except Exception as e:
+        logger.error(f"Error validating job role: {e}")
+        return {
+            "is_valid": False,
+            "message": f"❌ Error validating job role: {str(e)}",
+            "suggested_roles": []
+        }
+
+def get_job_details(job_title: str, job_descriptions_df: pd.DataFrame) -> Optional[Dict]:
+    """
+    Get job details for a specific job title
+    
+    Args:
+        job_title (str): The job title to search for
+        job_descriptions_df (pd.DataFrame): DataFrame containing job descriptions
+        
+    Returns:
+        dict or None: Job details if found, None otherwise
+    """
+    try:
+        if not job_title or job_descriptions_df.empty:
+            return None
+        
+        # Find matching job (case-insensitive)
+        job_title_lower = job_title.strip().lower()
+        matching_jobs = job_descriptions_df[
+            job_descriptions_df['job_title'].str.lower().str.strip() == job_title_lower
+        ]
+        
+        if matching_jobs.empty:
+            return None
+        
+        # Return first match
+        job_data = matching_jobs.iloc[0]
+        return {
+            "job_title": job_data['job_title'],
+            "skills": job_data['skills'],
+            "job_description": job_data['job_description']
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting job details: {e}")
+        return None
 
 # ------------------- RESUME TEXT EXTRACTION -------------------
 def extract_text_from_resume(uploaded_file) -> str:
@@ -218,17 +332,104 @@ def load_job_descriptions(file_path: str) -> pd.DataFrame:
         logger.error(f"Error loading job descriptions: {e}")
         raise ValueError(f"❌ Error loading job descriptions: {str(e)}")
 
-# ------------------- ENHANCED MATCHING SCORE -------------------
-def get_match_score(resume_text: str, job_description: str) -> float:
+# ------------------- ENHANCED MATCHING SCORE WITH VALIDATION -------------------
+def get_match_score(resume_text: str, job_desc: str) -> float:
     """Compute similarity score (0–100) using spaCy embeddings with caching."""
-    if not resume_text or not job_description:
+    if not resume_text or not job_desc:
         return 0.0
     
     try:
-        return processor.get_similarity_score(resume_text, job_description)
+        return processor.get_similarity_score(resume_text, job_desc)
     except Exception as e:
         logger.error(f"Error calculating match score: {e}")
         return 0.0
+
+def calculate_resume_job_match(resume_text: str, selected_job_role: str, job_descriptions_df: pd.DataFrame) -> Dict:
+    """
+    Main function to calculate resume-job matching with job role validation
+    
+    Args:
+        resume_text (str): Extracted text from resume
+        selected_job_role (str): Job role selected by user
+        job_descriptions_df (pd.DataFrame): DataFrame containing job descriptions
+        
+    Returns:
+        dict: Complete analysis result with validation status
+    """
+    try:
+        # Step 1: Validate job role
+        validation_result = validate_job_role(selected_job_role, job_descriptions_df)
+        
+        if not validation_result["is_valid"]:
+            return {
+                "is_valid_job": False,
+                "validation_message": validation_result["message"],
+                "suggested_roles": validation_result["suggested_roles"],
+                "overall_score": None,
+                "skill_match_score": None,
+                "context_match_score": None,
+                "matched_skills": [],
+                "missing_skills": [],
+                "recommendations": []
+            }
+        
+        # Step 2: Get job details
+        job_details = get_job_details(selected_job_role, job_descriptions_df)
+        
+        if not job_details:
+            return {
+                "is_valid_job": False,
+                "validation_message": f"❌ Could not find details for job role: '{selected_job_role}'",
+                "suggested_roles": job_descriptions_df['job_title'].head(5).tolist(),
+                "overall_score": None,
+                "skill_match_score": None,
+                "context_match_score": None,
+                "matched_skills": [],
+                "missing_skills": [],
+                "recommendations": []
+            }
+        
+        # Step 3: Calculate comprehensive score
+        score_result = calculate_comprehensive_score(
+            resume_text, 
+            job_details["skills"], 
+            job_details["job_description"]
+        )
+        
+        # Step 4: Generate recommendations
+        recommendations = generate_skill_recommendations(
+            score_result["missing_skills"], 
+            selected_job_role
+        )
+        
+        return {
+            "is_valid_job": True,
+            "validation_message": "✅ Valid job role",
+            "job_details": job_details,
+            "overall_score": score_result["overall_score"],
+            "skill_match_score": score_result["skill_match_score"],
+            "context_match_score": score_result["context_match_score"],
+            "matched_skills": score_result["matched_skills"],
+            "missing_skills": score_result["missing_skills"],
+            "total_skills": score_result["total_skills"],
+            "matched_count": score_result["matched_count"],
+            "recommendations": recommendations,
+            "suggested_roles": []
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in resume-job matching: {e}")
+        return {
+            "is_valid_job": False,
+            "validation_message": f"❌ Error processing job match: {str(e)}",
+            "suggested_roles": [],
+            "overall_score": None,
+            "skill_match_score": None,
+            "context_match_score": None,
+            "matched_skills": [],
+            "missing_skills": [],
+            "recommendations": []
+        }
 
 # ------------------- ADVANCED SKILL EXTRACTION -------------------
 def extract_skills_advanced(text: str) -> List[str]:
@@ -430,3 +631,33 @@ def generate_skill_recommendations(missing_skills: List[str], job_title: str = "
             recommendations.append("👥 Develop leadership and project management skills")
     
     return recommendations
+
+# ------------------- UTILITY FUNCTIONS FOR UI -------------------
+def display_validation_message(validation_result: Dict):
+    """Display validation message in Streamlit UI"""
+    if validation_result["is_valid_job"]:
+        st.success(validation_result["validation_message"])
+    else:
+        st.error(validation_result["validation_message"])
+        
+        # Show suggested roles if available
+        if validation_result["suggested_roles"]:
+            st.info("**Available job roles you might be looking for:**")
+            for role in validation_result["suggested_roles"]:
+                st.write(f"• {role}")
+
+def get_score_color(score: float) -> str:
+    """Get color based on score for better UI visualization"""
+    if score >= 80:
+        return "green"
+    elif score >= 60:
+        return "orange"
+    elif score >= 40:
+        return "red"
+    else:
+        return "darkred"
+
+def format_score_display(score: float, label: str) -> str:
+    """Format score for display with color coding"""
+    color = get_score_color(score)
+    return f":{color}[**{label}**: {score}%]"
