@@ -6,17 +6,24 @@ import plotly.express as px
 from io import BytesIO
 import logging
 from typing import Dict, List
+import os
+import sys
+import time
 
 # Import our enhanced utilities
-from utils import (
-    extract_text_from_resume, 
-    load_job_descriptions, 
-    get_match_score, 
-    extract_skills,
-    extract_skills_advanced,
-    calculate_comprehensive_score,
-    generate_skill_recommendations
-)
+try:
+    from utils import (
+        extract_text_from_resume, 
+        load_job_descriptions, 
+        get_match_score, 
+        extract_skills,
+        extract_skills_advanced,
+        calculate_comprehensive_score,
+        generate_skill_recommendations
+    )
+except ImportError as e:
+    st.error(f"Error importing utilities: {e}")
+    st.stop()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,12 +37,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ------------------- OPTIMIZED CSS - MEDIUM SIZING -------------------
+# ------------------- CSS STYLES -------------------
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        /* Global Variables - DARK THEME */
         :root {
             --primary-color: #7c3aed;
             --primary-dark: #5b21b6;
@@ -71,7 +77,6 @@ st.markdown("""
             --neon-green: #10b981;
         }
         
-        /* Global Styles - OPTIMIZED SIZING */
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             font-weight: 500;
@@ -88,7 +93,6 @@ st.markdown("""
             color: var(--text-primary);
         }
         
-        /* Subtle Background Effects */
         .main::before {
             content: '';
             position: fixed;
@@ -109,7 +113,6 @@ st.markdown("""
             50% { transform: translateY(-15px); }
         }
         
-        /* Minimal Grid Overlay */
         .main::after {
             content: '';
             position: fixed;
@@ -125,7 +128,6 @@ st.markdown("""
             opacity: 0.6;
         }
         
-        /* Header Styles - MEDIUM SIZE */
         .hero-section {
             text-align: center;
             padding: 2.5rem 0 3rem 0;
@@ -214,7 +216,6 @@ st.markdown("""
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Card Styles - MEDIUM SIZE */
         .modern-card {
             background: var(--card-bg);
             border-radius: 16px;
@@ -270,7 +271,6 @@ st.markdown("""
             opacity: 0.2;
         }
         
-        /* Section Headers - MEDIUM SIZE */
         .section-header {
             display: flex;
             align-items: center;
@@ -294,7 +294,6 @@ st.markdown("""
             opacity: 0.8;
         }
         
-        /* Metric Cards - MEDIUM SIZE */
         .metric-card {
             background: var(--gradient-primary);
             padding: 1.5rem;
@@ -350,7 +349,6 @@ st.markdown("""
             z-index: 2;
         }
         
-        /* Skill Badges - MEDIUM SIZE */
         .skill-badge {
             display: inline-flex;
             align-items: center;
@@ -425,7 +423,6 @@ st.markdown("""
             justify-content: center;
         }
         
-        /* Info Panels - MEDIUM SIZE */
         .info-panel {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-hover) 100%);
             border: 1px solid var(--border-glow);
@@ -463,7 +460,6 @@ st.markdown("""
             font-weight: 600;
         }
         
-        /* Buttons - MEDIUM SIZE */
         .stButton button {
             background: var(--gradient-primary) !important;
             border: 1px solid var(--neon-purple) !important;
@@ -490,7 +486,6 @@ st.markdown("""
             transform: translateY(-1px) !important;
         }
         
-        /* File Uploader - MEDIUM SIZE */
         .stFileUploader {
             border: none !important;
         }
@@ -510,7 +505,6 @@ st.markdown("""
             box-shadow: var(--shadow-glow-cyan) !important;
         }
         
-        /* Sidebar - COMPACT */
         .css-1d391kg {
             background: var(--gradient-primary) !important;
         }
@@ -520,7 +514,6 @@ st.markdown("""
             color: white !important;
         }
         
-        /* Progress Bar - MEDIUM SIZE */
         .stProgress > div > div > div {
             background: var(--gradient-primary) !important;
             box-shadow: 0 0 8px var(--neon-purple) !important;
@@ -531,7 +524,6 @@ st.markdown("""
             border: 1px solid var(--border-glow) !important;
         }
         
-        /* Selectbox - MEDIUM SIZE */
         .stSelectbox > div > div {
             border-radius: 12px !important;
             border: 1px solid var(--border-glow) !important;
@@ -545,7 +537,6 @@ st.markdown("""
             box-shadow: var(--shadow-glow) !important;
         }
         
-        /* Text Areas - MEDIUM SIZE */
         .stTextArea > div > div {
             border-radius: 12px !important;
             border: 1px solid var(--border-glow) !important;
@@ -559,7 +550,6 @@ st.markdown("""
             box-shadow: var(--shadow-glow) !important;
         }
         
-        /* Expander - MEDIUM SIZE */
         .streamlit-expanderHeader {
             background: var(--card-bg) !important;
             border-radius: 12px !important;
@@ -579,7 +569,6 @@ st.markdown("""
             color: var(--text-primary) !important;
         }
         
-        /* Stats Container - OPTIMIZED GRID */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -587,7 +576,6 @@ st.markdown("""
             margin: 2rem 0;
         }
         
-        /* Mini Metric Cards */
         .mini-metric-card {
             background: var(--card-bg);
             padding: 1rem;
@@ -618,7 +606,6 @@ st.markdown("""
             letter-spacing: 0.5px;
         }
         
-        /* Custom Scrollbars - THINNER */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -638,7 +625,6 @@ st.markdown("""
             background: var(--gradient-secondary);
         }
         
-        /* General Text Sizing */
         h1, h2, h3, h4, h5, h6 {
             color: var(--text-primary) !important;
             font-weight: 700 !important;
@@ -652,7 +638,6 @@ st.markdown("""
             color: var(--text-primary) !important;
         }
         
-        /* Compact Sidebar Elements */
         .sidebar-feature {
             display: flex;
             flex-direction: column;
@@ -697,7 +682,6 @@ st.markdown("""
             letter-spacing: 0.5px;
         }
         
-        /* Responsive Design - OPTIMIZED */
         @media (max-width: 768px) {
             .main-header {
                 font-size: 2rem;
@@ -725,7 +709,6 @@ st.markdown("""
             }
         }
         
-        /* File Details Styling */
         .file-detail-item {
             display: flex;
             justify-content: space-between;
@@ -748,7 +731,6 @@ st.markdown("""
             font-size: 0.85rem;
         }
         
-        /* Code Preview Styling */
         .code-preview {
             background: #000;
             border-radius: 8px;
@@ -764,111 +746,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ------------------- COMPACT HERO SECTION -------------------
-st.markdown("""
-    <div class="hero-section">
-        <h1 class="main-header">SkillMatch AI</h1>
-        <p class="sub-header">AI-Powered Resume Analysis & Career Optimization</p>
-        <div class="feature-badges">
-            <div class="feature-badge">
-                <span>🎯</span> Precision Matching
-            </div>
-            <div class="feature-badge">
-                <span>🚀</span> AI Insights
-            </div>
-            <div class="feature-badge">
-                <span>⚡</span> Instant Analysis
-            </div>
-            <div class="feature-badge">
-                <span>🔥</span> Career Boost
-            </div>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# ------------------- COMPACT SIDEBAR -------------------
-with st.sidebar:
-    st.markdown("### Advanced Features")
-    st.markdown("""
-    <div class="info-panel">
-        <strong>SkillMatch AI</strong> delivers intelligent career analysis:
-        <br><br>
-        <div class="sidebar-feature">
-            <div>🎯 <strong>Smart Analysis:</strong> Advanced matching algorithms</div>
-            <div>⚡ <strong>Quick Insights:</strong> Real-time gap identification</div>
-            <div>🚀 <strong>AI Recommendations:</strong> Personalized career advice</div>
-            <div>💎 <strong>Detailed Reports:</strong> Professional analysis documents</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("### Quick Start")
-    steps = [
-        "📤 Upload Resume",
-        "🎯 Select Role", 
-        "⚡ Run Analysis",
-        "📊 View Results",
-        "📥 Download Report"
-    ]
-    
-    for i, step in enumerate(steps, 1):
-        st.markdown(f"""
-        <div class="sidebar-step">
-            <div class="step-number">{i}</div>
-            <span class="step-text">{step}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.markdown("### Pro Tips")
-    st.markdown("""
-    <div class="sidebar-feature">
-        <div style="margin-bottom: 0.5rem; font-weight: 700;">💼 Keep Resume Updated</div>
-        <div style="margin-bottom: 0.5rem; font-weight: 700;">🔍 Use Power Keywords</div>
-        <div style="margin-bottom: 0.5rem; font-weight: 700;">📈 Track Progress</div>
-        <div style="font-weight: 700;">🎯 Target Smart Roles</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.markdown("### Support")
-    st.markdown("""
-    <div style="text-align: center; color: white;">
-        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📚 <a href="#" style="color: #06b6d4; text-decoration: none;">Guide</a></div>
-        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">💬 <a href="#" style="color: #06b6d4; text-decoration: none;">Help</a></div>
-        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📧 <a href="#" style="color: #06b6d4; text-decoration: none;">Contact</a></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ------------------- DATA LOADING -------------------
-@st.cache_data(ttl=3600)
-def load_data():
-    """Load job descriptions with error handling"""
-    try:
-        return load_job_descriptions("job_descriptions.csv")
-    except Exception as e:
-        st.error(f"❌ Error loading job data: {str(e)}")
-        st.info("📝 Make sure 'job_descriptions.csv' exists with columns: job_title, skills, job_description")
-        st.stop()
-
-# Load data with compact loading indicator
-with st.spinner("🔄 Loading job descriptions..."):
-    job_data = load_data()
-
-# Compact success message
-st.markdown(f"""
-<div class="success-panel">
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <div style="font-size: 1.25rem;">✅</div>
-        <div>
-            <strong style="font-size: 1rem; font-weight: 800;">System Ready!</strong><br>
-            <span style="color: #10b981; font-weight: 600; font-size: 0.9rem;">Loaded {len(job_data)} job profiles</span>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ------------------- PROFESSIONAL TITLE FORMATTER -------------------
+# ------------------- TITLE FORMATTER -------------------
 import re
 
 _SPECIAL_CAPS = {
@@ -933,7 +811,6 @@ def prettify_role(role: str) -> str:
     tokens = re.sub(r"\s+", " ", s).strip().lower().split(" ")
     pretty = " ".join(_cap_token(t) for t in tokens if t)
     
-    # Additional formatting
     replacements = {
         "Fullstack": "Full Stack",
         "Frontend": "Frontend", 
@@ -945,17 +822,133 @@ def prettify_role(role: str) -> str:
     
     return pretty
 
+# ------------------- HERO SECTION -------------------
+st.markdown("""
+    <div class="hero-section">
+        <h1 class="main-header">SkillMatch AI</h1>
+        <p class="sub-header">AI-Powered Resume Analysis & Career Optimization</p>
+        <div class="feature-badges">
+            <div class="feature-badge">
+                <span>🎯</span> Precision Matching
+            </div>
+            <div class="feature-badge">
+                <span>🚀</span> AI Insights
+            </div>
+            <div class="feature-badge">
+                <span>⚡</span> Instant Analysis
+            </div>
+            <div class="feature-badge">
+                <span>🔥</span> Career Boost
+            </div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# ------------------- SIDEBAR -------------------
+with st.sidebar:
+    st.markdown("### Advanced Features")
+    st.markdown("""
+    <div class="info-panel">
+        <strong>SkillMatch AI</strong> delivers intelligent career analysis:
+        <br><br>
+        <div class="sidebar-feature">
+            <div>🎯 <strong>Smart Analysis:</strong> Advanced matching algorithms</div>
+            <div>⚡ <strong>Quick Insights:</strong> Real-time gap identification</div>
+            <div>🚀 <strong>AI Recommendations:</strong> Personalized career advice</div>
+            <div>💎 <strong>Detailed Reports:</strong> Professional analysis documents</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### Quick Start")
+    steps = [
+        "📤 Upload Resume",
+        "🎯 Select Role", 
+        "⚡ Run Analysis",
+        "📊 View Results",
+        "📥 Download Report"
+    ]
+    
+    for i, step in enumerate(steps, 1):
+        st.markdown(f"""
+        <div class="sidebar-step">
+            <div class="step-number">{i}</div>
+            <span class="step-text">{step}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### Pro Tips")
+    st.markdown("""
+    <div class="sidebar-feature">
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">💼 Keep Resume Updated</div>
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">🔍 Use Power Keywords</div>
+        <div style="margin-bottom: 0.5rem; font-weight: 700;">📈 Track Progress</div>
+        <div style="font-weight: 700;">🎯 Target Smart Roles</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### Support")
+    st.markdown("""
+    <div style="text-align: center; color: white;">
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📚 Guide</div>
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">💬 Help</div>
+        <div style="margin: 0.5rem 0; font-weight: 700; font-size: 0.8rem;">📧 Contact</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ------------------- DATA LOADING -------------------
+@st.cache_data(ttl=3600)
+def load_data():
+    """Load job descriptions with error handling"""
+    try:
+        if not os.path.exists("job_descriptions.csv"):
+            st.error("❌ job_descriptions.csv file not found")
+            st.info("📝 Please ensure 'job_descriptions.csv' exists in the same directory as app.py")
+            st.stop()
+        
+        return load_job_descriptions("job_descriptions.csv")
+    except Exception as e:
+        st.error(f"❌ Error loading job data: {str(e)}")
+        st.info("📝 Make sure 'job_descriptions.csv' exists with columns: job_title, skills, job_description")
+        st.stop()
+
+# Load data with loading indicator
+try:
+    with st.spinner("🔄 Loading job descriptions..."):
+        job_data = load_data()
+    
+    st.markdown(f"""
+    <div class="success-panel">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="font-size: 1.25rem;">✅</div>
+            <div>
+                <strong style="font-size: 1rem; font-weight: 800;">System Ready!</strong><br>
+                <span style="color: #10b981; font-weight: 600; font-size: 0.9rem;">Loaded {len(job_data)} job profiles</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+except Exception as e:
+    st.error(f"❌ Failed to initialize application: {str(e)}")
+    st.stop()
+
 # Apply title formatting
-if "job_title" in job_data.columns:
-    job_data["display_title"] = job_data["job_title"].apply(prettify_role)
-else:
-    st.error("❌ CSV must include a 'job_title' column.")
+try:
+    if "job_title" in job_data.columns:
+        job_data["display_title"] = job_data["job_title"].apply(prettify_role)
+    else:
+        st.error("❌ CSV must include a 'job_title' column.")
+        st.stop()
+except Exception as e:
+    st.error(f"❌ Error formatting job titles: {str(e)}")
     st.stop()
 
 # ------------------- MAIN APPLICATION -------------------
 st.markdown('<div class="section-header">📁 Upload Resume</div>', unsafe_allow_html=True)
 
-# Compact file upload section
 st.markdown("""
 <div class="modern-card">
     <div style="text-align: center; margin-bottom: 1.5rem;">
@@ -975,7 +968,6 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Compact file info display
     st.markdown("""
     <div class="modern-card">
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
@@ -988,12 +980,12 @@ if uploaded_file:
     </div>
     """, unsafe_allow_html=True)
     
-    # Compact file details
+    # File details
     with st.expander("📄 File Details", expanded=False):
         file_details = {
             "📝 Filename": uploaded_file.name,
             "📊 File Size": f"{uploaded_file.size / 1024:.2f} KB",
-            "🗂️ File Type": uploaded_file.type
+            "🗂️ File Type": uploaded_file.type or "Unknown"
         }
         
         for key, value in file_details.items():
@@ -1009,7 +1001,6 @@ if uploaded_file:
         resume_text = extract_text_from_resume(uploaded_file)
     
     if resume_text:
-        # Compact success message
         st.markdown("""
         <div class="success-panel">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1022,7 +1013,7 @@ if uploaded_file:
         </div>
         """, unsafe_allow_html=True)
         
-        # Compact text preview
+        # Text preview
         with st.expander("👀 Resume Preview", expanded=False):
             preview_text = resume_text[:400] + "..." if len(resume_text) > 400 else resume_text
             st.markdown(f"""
@@ -1054,27 +1045,29 @@ if uploaded_file:
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Job role selection
-            job_roles = sorted(job_data["display_title"].unique())
-            job_role_display = st.selectbox(
-                "Available Job Roles:",
-                options=job_roles,
-                help="Select from our database of job roles",
-                key="job_role_selector"
-            )
-            
-            # Compact role statistics
-            if job_role_display:
-                role_count = len(job_data[job_data["display_title"] == job_role_display])
-                st.markdown(f"""
-                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%); border-radius: 8px; padding: 0.75rem; margin: 0.75rem 0; border: 1px solid rgba(99, 102, 241, 0.2);">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 1rem;">📊</span>
-                        <span style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">Role Stats:</span>
-                        <span style="background: var(--primary-color); color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">{role_count} variations</span>
+            try:
+                job_roles = sorted(job_data["display_title"].unique())
+                job_role_display = st.selectbox(
+                    "Available Job Roles:",
+                    options=job_roles,
+                    help="Select from our database of job roles",
+                    key="job_role_selector"
+                )
+                
+                if job_role_display:
+                    role_count = len(job_data[job_data["display_title"] == job_role_display])
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%); border-radius: 8px; padding: 0.75rem; margin: 0.75rem 0; border: 1px solid rgba(99, 102, 241, 0.2);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">📊</span>
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">Role Stats:</span>
+                            <span style="background: var(--primary-color); color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">{role_count} variations</span>
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"❌ Error loading job roles: {str(e)}")
+                st.stop()
         
         with col2:
             st.markdown("<br>", unsafe_allow_html=True)
@@ -1086,7 +1079,7 @@ if uploaded_file:
         
         # Analysis logic
         if analyze_button:
-            if job_role_display not in job_data["display_title"].values:
+            if not job_role_display or job_role_display not in job_data["display_title"].values:
                 st.markdown("""
                 <div class="warning-panel">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1099,7 +1092,7 @@ if uploaded_file:
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                # Compact progress display
+                # Progress display
                 progress_container = st.container()
                 
                 with progress_container:
@@ -1113,7 +1106,6 @@ if uploaded_file:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # Compact progress bar
                     progress_bar = st.progress(0)
                     status_text = st.empty()
                     
@@ -1125,7 +1117,6 @@ if uploaded_file:
                         "✅ Complete!"
                     ]
                     
-                    import time
                     for i, step in enumerate(analysis_steps):
                         status_text.markdown(f"""
                         <div style="text-align: center; color: var(--text-primary); font-weight: 500; padding: 0.25rem; font-size: 0.85rem;">
@@ -1139,10 +1130,10 @@ if uploaded_file:
                     status_text.empty()
                 
                 # Perform analysis
-                with st.spinner("🔍 Analyzing match..."):
-                    selected_job = job_data[job_data["display_title"] == job_role_display].iloc[0]
-                    
-                    try:
+                try:
+                    with st.spinner("🔍 Analyzing match..."):
+                        selected_job = job_data[job_data["display_title"] == job_role_display].iloc[0]
+                        
                         basic_match_score = get_match_score(resume_text, selected_job["skills"])
                         
                         resume_skills = extract_skills_advanced(resume_text)
@@ -1169,7 +1160,7 @@ if uploaded_file:
                             match_result = calculate_comprehensive_score(
                                 resume_text, 
                                 selected_job["skills"], 
-                                selected_job["job_description"]
+                                selected_job.get("job_description", "")
                             )
                             overall_score = match_result["overall_score"]
                             skill_match = match_result["skill_match_score"]
@@ -1177,25 +1168,8 @@ if uploaded_file:
                             matched_skills = match_result["matched_skills"]
                             missing_skills = match_result["missing_skills"]
                         
-                        except TypeError as e:
-                            if "takes 2 positional arguments but 3 were given" in str(e):
-                                match_result = calculate_comprehensive_score(resume_text, selected_job["skills"])
-                                
-                                if isinstance(match_result, dict):
-                                    overall_score = match_result.get("overall_score", skill_match_percentage)
-                                    skill_match = match_result.get("skill_match_score", skill_match_percentage)
-                                    context_match = match_result.get("context_match_score", basic_match_score)
-                                    matched_skills = match_result.get("matched_skills", matched_skills)
-                                    missing_skills = match_result.get("missing_skills", missing_skills)
-                                else:
-                                    overall_score = match_result
-                                    skill_match = skill_match_percentage
-                                    context_match = basic_match_score
-                            else:
-                                raise e
-                        
                         except Exception as e:
-                            st.warning(f"⚠️ Advanced scoring unavailable, using basic analysis: {str(e)}")
+                            logger.warning(f"Advanced scoring failed, using basic: {str(e)}")
                             overall_score = skill_match_percentage
                             skill_match = skill_match_percentage
                             context_match = basic_match_score
@@ -1206,12 +1180,11 @@ if uploaded_file:
                                 selected_job["job_title"]
                             )
                         except Exception as e:
-                            st.warning(f"⚠️ Recommendations unavailable: {str(e)}")
+                            logger.warning(f"Recommendations failed: {str(e)}")
                             recommendations = [
                                 f"Consider learning {skill}" for skill in missing_skills[:5]
                             ]
                         
-                        # Compact success message
                         st.markdown("""
                         <div class="success-panel">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1224,10 +1197,10 @@ if uploaded_file:
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # ------------------- COMPACT RESULTS DISPLAY -------------------
+                        # Results Display
                         st.markdown('<div class="section-header">📊 Results</div>', unsafe_allow_html=True)
                         
-                        # Main Score Display - 3 columns
+                        # Main Score Display
                         col1, col2, col3 = st.columns(3)
                         
                         with col1:
@@ -1255,7 +1228,7 @@ if uploaded_file:
                                 </div>
                             """, unsafe_allow_html=True)
                         
-                        # Mini metrics - 4 columns
+                        # Mini metrics
                         col1, col2, col3, col4 = st.columns(4)
                         
                         with col1:
@@ -1277,11 +1250,12 @@ if uploaded_file:
                             """, unsafe_allow_html=True)
                         
                         with col3:
+                            total_skills = len(matched_skills) + len(missing_skills)
                             st.markdown(f"""
                             <div class="mini-metric-card">
                                 <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">📋</div>
-                                <div class="mini-metric-value" style="color: var(--primary-color);">{len(job_skills)}</div>
-                                <div class="mini-metric-label" style="color: var(--text-secondary);">Required</div>
+                                <div class="mini-metric-value" style="color: var(--primary-color);">{total_skills}</div>
+                                <div class="mini-metric-label" style="color: var(--text-secondary);">Total Skills</div>
                             </div>
                             """, unsafe_allow_html=True)
                         
@@ -1295,7 +1269,7 @@ if uploaded_file:
                             </div>
                             """, unsafe_allow_html=True)
                         
-                        # Compact progress breakdown
+                        # Progress breakdown
                         st.markdown('<div class="section-header">📈 Breakdown</div>', unsafe_allow_html=True)
                         
                         col1, col2 = st.columns(2)
@@ -1307,7 +1281,7 @@ if uploaded_file:
                             </div>
                             """, unsafe_allow_html=True)
                             st.progress(skill_match / 100)
-                            st.write(f"**{len(matched_skills)}** matched out of **{len(job_skills)}** required")
+                            st.write(f"**{len(matched_skills)}** matched out of **{total_skills}** analyzed")
                         
                         with col2:
                             st.markdown("""
@@ -1318,7 +1292,7 @@ if uploaded_file:
                             st.progress(context_match / 100)
                             st.write("Based on resume content analysis")
                         
-                        # Skills Analysis - Compact
+                        # Skills Analysis
                         st.markdown('<div class="section-header">🎯 Skills Analysis</div>', unsafe_allow_html=True)
                         
                         col1, col2 = st.columns(2)
@@ -1361,7 +1335,7 @@ if uploaded_file:
                                 st.success("🎉 All required skills found!")
                             st.markdown("</div>", unsafe_allow_html=True)
                         
-                        # Compact Recommendations
+                        # Recommendations
                         if recommendations:
                             st.markdown('<div class="section-header">💡 Recommendations</div>', unsafe_allow_html=True)
                             
@@ -1385,94 +1359,102 @@ if uploaded_file:
                                 </div>
                                 """, unsafe_allow_html=True)
                         
-                        # Compact Visualization Section
+                        # Visualization Section
                         st.markdown('<div class="section-header">📊 Visual Analysis</div>', unsafe_allow_html=True)
                         
                         fig_col1, fig_col2 = st.columns(2)
                         
                         with fig_col1:
-                            # Compact pie chart
                             if matched_skills or missing_skills:
-                                labels = ['Matched Skills', 'Missing Skills']
-                                values = [len(matched_skills), len(missing_skills)]
-                                colors = ['#10b981', '#ef4444']
-                                
-                                fig = go.Figure(data=[go.Pie(
-                                    labels=labels, 
-                                    values=values,
-                                    hole=.3,
-                                    marker_colors=colors
-                                )])
-                                fig.update_layout(
-                                    title="Skills Distribution",
-                                    font=dict(size=12),
-                                    height=300,
-                                    margin=dict(t=40, b=20, l=20, r=20)
-                                )
-                                st.plotly_chart(fig, use_container_width=True)
+                                try:
+                                    labels = ['Matched Skills', 'Missing Skills']
+                                    values = [len(matched_skills), len(missing_skills)]
+                                    colors = ['#10b981', '#ef4444']
+                                    
+                                    fig = go.Figure(data=[go.Pie(
+                                        labels=labels, 
+                                        values=values,
+                                        hole=.3,
+                                        marker_colors=colors
+                                    )])
+                                    fig.update_layout(
+                                        title="Skills Distribution",
+                                        font=dict(size=12),
+                                        height=300,
+                                        margin=dict(t=40, b=20, l=20, r=20),
+                                        paper_bgcolor='rgba(0,0,0,0)',
+                                        plot_bgcolor='rgba(0,0,0,0)'
+                                    )
+                                    st.plotly_chart(fig, use_container_width=True)
+                                except Exception as e:
+                                    st.error(f"Error creating pie chart: {str(e)}")
                             else:
-                                st.info("No skills data available")
+                                st.info("No skills data available for visualization")
                         
                         with fig_col2:
-                            # Compact bar chart
-                            categories = ['Skill Match', 'Context Match', 'Overall Score']
-                            scores = [skill_match, context_match, overall_score]
-                            
-                            fig = go.Figure([go.Bar(
-                                x=categories,
-                                y=scores,
-                                marker_color=['#6366f1', '#8b5cf6', '#10b981']
-                            )])
-                            fig.update_layout(
-                                title="Score Breakdown",
-                                yaxis=dict(range=[0, 100]),
-                                font=dict(size=12),
-                                height=300,
-                                margin=dict(t=40, b=20, l=20, r=20)
-                            )
-                            st.plotly_chart(fig, use_container_width=True)
+                            try:
+                                categories = ['Skill Match', 'Context Match', 'Overall Score']
+                                scores = [skill_match, context_match, overall_score]
+                                
+                                fig = go.Figure([go.Bar(
+                                    x=categories,
+                                    y=scores,
+                                    marker_color=['#6366f1', '#8b5cf6', '#10b981']
+                                )])
+                                fig.update_layout(
+                                    title="Score Breakdown",
+                                    yaxis=dict(range=[0, 100]),
+                                    font=dict(size=12),
+                                    height=300,
+                                    margin=dict(t=40, b=20, l=20, r=20),
+                                    paper_bgcolor='rgba(0,0,0,0)',
+                                    plot_bgcolor='rgba(0,0,0,0)'
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
+                            except Exception as e:
+                                st.error(f"Error creating bar chart: {str(e)}")
                         
-                        # Compact Job Requirements
+                        # Job Requirements
                         with st.expander("📋 Job Requirements", expanded=False):
                             st.markdown("**Job Title:** " + prettify_role(selected_job["job_title"]))
                             st.markdown("**Required Skills:**")
                             st.write(selected_job["skills"])
-                            if "job_description" in selected_job.index:
+                            if "job_description" in selected_job.index and selected_job["job_description"]:
                                 st.markdown("**Job Description:**")
                                 st.write(selected_job["job_description"])
                         
-                        # Compact Export Section
+                        # Export Section
                         st.markdown('<div class="section-header">📥 Export</div>', unsafe_allow_html=True)
                         
-                        # Prepare report data
-                        report_data = {
-                            "Analysis Date": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "Target Job Role": job_role_display,
-                            "Overall Match Score": f"{overall_score:.1f}%",
-                            "Skill Match Score": f"{skill_match:.1f}%",
-                            "Context Match Score": f"{context_match:.1f}%",
-                            "Matched Skills": ", ".join(matched_skills),
-                            "Missing Skills": ", ".join(missing_skills),
-                            "Recommendations": " | ".join(recommendations[:5])
-                        }
-                        
-                        report_df = pd.DataFrame([report_data])
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            csv_buffer = BytesIO()
-                            report_df.to_csv(csv_buffer, index=False)
-                            st.download_button(
-                                label="📄 CSV Report",
-                                data=csv_buffer.getvalue(),
-                                file_name=f"skillmatch_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                                mime="text/csv"
-                            )
-                        
-                        with col2:
-                            text_report = f"""
-SKILLMATCH AI ANALYSIS REPORT
+                        try:
+                            report_data = {
+                                "Analysis Date": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "Target Job Role": job_role_display,
+                                "Overall Match Score": f"{overall_score:.1f}%",
+                                "Skill Match Score": f"{skill_match:.1f}%",
+                                "Context Match Score": f"{context_match:.1f}%",
+                                "Matched Skills": ", ".join(matched_skills),
+                                "Missing Skills": ", ".join(missing_skills),
+                                "Recommendations": " | ".join(recommendations[:5])
+                            }
+                            
+                            report_df = pd.DataFrame([report_data])
+                            
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                csv_buffer = BytesIO()
+                                report_df.to_csv(csv_buffer, index=False)
+                                st.download_button(
+                                    label="📄 CSV Report",
+                                    data=csv_buffer.getvalue(),
+                                    file_name=f"skillmatch_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                    mime="text/csv",
+                                    use_container_width=True
+                                )
+                            
+                            with col2:
+                                text_report = f"""SKILLMATCH AI ANALYSIS REPORT
 ================================
 Date: {report_data['Analysis Date']}
 Target Role: {report_data['Target Job Role']}
@@ -1490,26 +1472,32 @@ MISSING SKILLS:
 
 RECOMMENDATIONS:
 {chr(10).join([f"- {rec}" for rec in recommendations[:5]])}
+
+Generated by SkillMatch AI
 """
-                            st.download_button(
-                                label="📝 Text Report",
-                                data=text_report,
-                                file_name=f"skillmatch_summary_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                                mime="text/plain"
-                            )
+                                st.download_button(
+                                    label="📝 Text Report",
+                                    data=text_report,
+                                    file_name=f"skillmatch_summary_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                                    mime="text/plain",
+                                    use_container_width=True
+                                )
+                        except Exception as e:
+                            st.error(f"Error preparing export data: {str(e)}")
                     
-                    except Exception as e:
-                        st.markdown(f"""
-                        <div class="warning-panel">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div style="font-size: 1.25rem;">⚠️</div>
-                                <div>
-                                    <strong style="font-size: 0.95rem;">Analysis Error</strong><br>
-                                    <span style="color: #d97706; font-size: 0.8rem;">Error: {str(e)}</span>
-                                </div>
+                except Exception as e:
+                    st.markdown(f"""
+                    <div class="warning-panel">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="font-size: 1.25rem;">⚠️</div>
+                            <div>
+                                <strong style="font-size: 0.95rem;">Analysis Error</strong><br>
+                                <span style="color: #d97706; font-size: 0.8rem;">Error: {str(e)}</span>
                             </div>
                         </div>
-                        """, unsafe_allow_html=True)
+                    </div>
+                    """, unsafe_allow_html=True)
+                    logger.error(f"Analysis error: {str(e)}")
     
     else:
         st.markdown("""
@@ -1525,7 +1513,7 @@ RECOMMENDATIONS:
         """, unsafe_allow_html=True)
 
 else:
-    # Compact call-to-action
+    # Call-to-action when no file uploaded
     st.markdown("""
     <div class="upload-card">
         <div style="font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.5;">📁</div>
@@ -1545,7 +1533,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# Compact Footer
+# Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 1.5rem 0; color: var(--text-secondary);">
