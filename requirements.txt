@@ -1,6 +1,50 @@
-streamlit
-pandas
-scikit-learn
-matplotlib
-PyPDF2
-python-docx
+# ===============================
+# CORE & ENVIRONMENT
+# ===============================
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+tqdm==4.66.1
+orjson==3.10.7
+joblib==1.3.2
+loguru==0.7.2
+pydantic==2.4.2
+
+# ===============================
+# STREAMLIT & WEB FRAMEWORK
+# ===============================
+streamlit==1.37.0
+click==8.1.7
+
+# ===============================
+# DATA PROCESSING & ANALYSIS
+# ===============================
+pandas==2.2.2
+numpy==1.26.4    # âœ… Stable for ML & spaCy
+
+# ===============================
+# VISUALIZATION
+# ===============================
+matplotlib==3.9.2
+plotly==5.17.0
+seaborn==0.13.0
+
+# ===============================
+# RESUME/DOCUMENT PROCESSING
+# ===============================
+PyPDF2==2.10.7
+python-docx==0.8.11
+python-magic==0.4.27
+
+# ===============================
+# NATURAL LANGUAGE PROCESSING
+# ===============================
+spacy==3.7.1          # âœ… Stable version for matching scores
+nltk==3.8.1
+scikit-learn==1.2.2   # âœ… Stable, avoids low-score issue
+textdistance==4.6.0
+
+# ===============================
+# REPORT GENERATION
+# ===============================
+reportlab==4.2.2
+fpdf2==2.7.6
