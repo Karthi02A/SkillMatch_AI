@@ -688,6 +688,7 @@ def calculate_resume_job_match(resume_text: str, selected_job_role: str, job_des
             "matched_skills": [],
             "missing_skills": [],
             "recommendations": []
+        }
 <<<<<<< HEAD
         }
 =======
