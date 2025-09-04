@@ -1,0 +1,34 @@
+# Ignore virtual environments
+venv/
+.venv/
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment and IDE files
+.env
+*.env
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Ignore build and packaging files
+build/
+dist/
+*.egg-info/
+
+# Ignore container/dev files
+.devcontainer/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Streamlit specific
+.streamlit/secrets.toml
