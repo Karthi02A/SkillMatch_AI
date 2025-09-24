@@ -27,17 +27,22 @@ class ResumeProcessor:
         """Load spaCy model with fallback options"""
         try:
             import spacy
-            self.nlp = spacy.load("en_core_web_sm")
-            logger.info("spaCy model loaded successfully")
-        except OSError:
             try:
-                import spacy
-                import en_core_web_sm
-                self.nlp = en_core_web_sm.load()
-                logger.info("spaCy model loaded via module import")
-            except (ImportError, OSError):
-                logger.warning("spaCy model not available, using fallback similarity")
-                self.nlp = None
+                # Try loading the standard way
+                self.nlp = spacy.load("en_core_web_sm")
+                logger.info("spaCy model loaded successfully")
+            except OSError:
+                # Try alternative loading method
+                try:
+                    import en_core_web_sm
+                    self.nlp = en_core_web_sm.load()
+                    logger.info("spaCy model loaded via module import")
+                except (ImportError, OSError):
+                    logger.warning("spaCy model not available, using fallback similarity")
+                    self.nlp = None
+        except ImportError:
+            logger.warning("spaCy not installed, using fallback similarity")
+            self.nlp = None
         except Exception as e:
             logger.error(f"Error loading spaCy model: {e}")
             self.nlp = None
@@ -98,9 +103,9 @@ def extract_text_from_resume(uploaded_file) -> str:
         
         if file_type == "pdf":
             try:
-                from PyPDF2 import PdfReader
+                import PyPDF2
                 uploaded_file.seek(0)
-                pdf = PdfReader(uploaded_file)
+                pdf = PyPDF2.PdfReader(uploaded_file)
                 
                 if len(pdf.pages) == 0:
                     st.error("PDF file appears to be empty")
@@ -200,25 +205,33 @@ def load_job_descriptions(file_path: str) -> pd.DataFrame:
         }
         df.rename(columns=column_mapping, inplace=True)
 
-        # Validate required columns
-        required_cols = {"job_title", "skills", "job_description"}
-        available_cols = set(df.columns)
-        missing_cols = required_cols - available_cols
+        # Check for required columns with fallback
+        if "job_title" not in df.columns:
+            if "title" in df.columns:
+                df.rename(columns={"title": "job_title"}, inplace=True)
+            else:
+                raise ValueError("No job_title column found. Required columns: job_title, skills")
         
-        if missing_cols:
-            raise ValueError(
-                f"Missing required columns: {missing_cols}. "
-                f"Available columns: {list(available_cols)}"
-            )
+        if "skills" not in df.columns:
+            if "skill" in df.columns:
+                df.rename(columns={"skill": "skills"}, inplace=True)
+            elif "required_skills" in df.columns:
+                df.rename(columns={"required_skills": "skills"}, inplace=True)
+            else:
+                raise ValueError("No skills column found. Required columns: job_title, skills")
+        
+        # Add job_description if missing
+        if "job_description" not in df.columns:
+            df["job_description"] = df.get("description", "")
 
         # Clean data
-        result_df = df[list(required_cols)].copy()
+        result_df = df[["job_title", "skills", "job_description"]].copy()
         
         # Remove empty rows
         initial_rows = len(result_df)
         result_df = result_df[
             (result_df["job_title"].str.strip() != "") & 
-            (result_df["job_description"].str.strip() != "")
+            (result_df["skills"].str.strip() != "")
         ]
         
         if len(result_df) < initial_rows:
@@ -435,8 +448,12 @@ def validate_job_role(selected_job_role: str, job_descriptions_df: pd.DataFrame)
                 "suggested_roles": []
             }
         
-        # Get available job titles
-        available_jobs = job_descriptions_df['job_title'].str.strip().str.lower().tolist()
+        # Get available job titles - handle display_title or job_title
+        if "display_title" in job_descriptions_df.columns:
+            available_jobs = job_descriptions_df['display_title'].str.strip().str.lower().tolist()
+        else:
+            available_jobs = job_descriptions_df['job_title'].str.strip().str.lower().tolist()
+        
         selected_job_lower = selected_job_role.strip().lower()
         
         # Check for exact match
@@ -465,7 +482,12 @@ def validate_job_role(selected_job_role: str, job_descriptions_df: pd.DataFrame)
                 "suggested_roles": suggested_roles
             }
         else:
-            available_roles_sample = job_descriptions_df['job_title'].dropna().head(5).tolist()
+            # Get sample of available roles
+            if "display_title" in job_descriptions_df.columns:
+                available_roles_sample = job_descriptions_df['display_title'].dropna().head(5).tolist()
+            else:
+                available_roles_sample = job_descriptions_df['job_title'].dropna().head(5).tolist()
+            
             return {
                 "is_valid": False,
                 "message": f"Invalid job role: '{selected_job_role}'. This role is not available.",
@@ -487,16 +509,23 @@ def get_job_details(job_title: str, job_descriptions_df: pd.DataFrame) -> Option
             return None
         
         job_title_lower = job_title.strip().lower()
-        matching_jobs = job_descriptions_df[
-            job_descriptions_df['job_title'].str.lower().str.strip() == job_title_lower
-        ]
+        
+        # Try matching with display_title first, then job_title
+        if "display_title" in job_descriptions_df.columns:
+            matching_jobs = job_descriptions_df[
+                job_descriptions_df['display_title'].str.lower().str.strip() == job_title_lower
+            ]
+        else:
+            matching_jobs = job_descriptions_df[
+                job_descriptions_df['job_title'].str.lower().str.strip() == job_title_lower
+            ]
         
         if matching_jobs.empty:
             return None
         
         job_data = matching_jobs.iloc[0]
         return {
-            "job_title": job_data['job_title'],
+            "job_title": job_data.get('display_title', job_data.get('job_title', '')),
             "skills": job_data['skills'],
             "job_description": job_data.get('job_description', '')
         }
@@ -639,7 +668,7 @@ def calculate_resume_job_match(resume_text: str, selected_job_role: str, job_des
             return {
                 "is_valid_job": False,
                 "validation_message": f"Could not find details for job role: '{selected_job_role}'",
-                "suggested_roles": job_descriptions_df['job_title'].head(5).tolist(),
+                "suggested_roles": job_descriptions_df['job_title'].head(5).tolist() if 'job_title' in job_descriptions_df.columns else [],
                 "overall_score": None,
                 "skill_match_score": None,
                 "context_match_score": None,
@@ -688,4 +717,4 @@ def calculate_resume_job_match(resume_text: str, selected_job_role: str, job_des
             "matched_skills": [],
             "missing_skills": [],
             "recommendations": []
-            }
+        }
