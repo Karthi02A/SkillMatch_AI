@@ -1,17 +1,13 @@
 # ===============================
 # CORE & ENVIRONMENT
 # ===============================
-python-dotenv==1.0.1
-python-dateutil==2.9.0.post0
-tqdm==4.66.5
-joblib==1.4.2
-loguru==0.7.2
-pydantic==2.9.2
+python-dotenv==1.0.0
+python-dateutil==2.8.2
 
 # ===============================
 # STREAMLIT & WEB FRAMEWORK
 # ===============================
-streamlit==1.38.0
+streamlit==1.37.0
 click==8.1.7
 
 # ===============================
@@ -24,31 +20,21 @@ numpy==1.26.4
 # VISUALIZATION
 # ===============================
 matplotlib==3.9.2
-plotly==5.24.1
-seaborn==0.13.2
+plotly==5.17.0
 
 # ===============================
 # RESUME/DOCUMENT PROCESSING
 # ===============================
 PyPDF2==3.0.1
-python-docx==1.1.2
+python-docx==1.1.0
 
 # ===============================
 # NATURAL LANGUAGE PROCESSING
 # ===============================
-spacy==3.7.5
-nltk==3.9.1
-scikit-learn==1.5.2
-textdistance==4.6.2
-blis==0.7.11
+spacy==3.7.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
 # ===============================
-# REPORT GENERATION
+# ADDITIONAL UTILITIES  
 # ===============================
-reportlab==4.2.2
-fpdf2==2.8.1
-
-# ===============================
-# SPACY MODEL (for deployment)
-# ===============================
-en-core-web-sm==3.7.1
+textdistance==4.6.0
