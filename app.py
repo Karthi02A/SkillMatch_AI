@@ -959,12 +959,10 @@ st.markdown("""
         }
         
         .stProgress > div > div > div {
-            background: var(--gradient-primary) !important;
-            box-shadow: 0 0 8px var(--neon-purple) !important;
+             box-shadow: 0 0 8px var(--neon-purple) !important;
         }
         
         .stProgress > div > div {
-            background: var(--card-bg) !important;
             border: 1px solid var(--border-glow) !important;
         }
         
